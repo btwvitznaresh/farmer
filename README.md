@@ -50,10 +50,11 @@ When offline, the AI switches to a **Local Knowledge Base** with 100+ crop-speci
 
 ```bash
 # Clone the repository
-git clone https://github.com/Rehan-star-007/agrotalk-assist.git
+git clone 
+git clone https://github.com/btwvitznaresh/farmer.git
 
 # Navigate to project directory
-cd agrotalk-assist
+cd farmer
 
 # Install dependencies
 npm install
@@ -76,7 +77,7 @@ VITE_API_URL=http://localhost:3001
 ## 📁 Project Structure
 
 ```
-agrotalk-assist/
+farmer/
 ├── src/
 │   ├── components/     # React components
 │   ├── pages/          # Page components
