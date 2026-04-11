@@ -2,9 +2,21 @@
 
 > **Voice-first AI assistant helping farmers with agricultural advice in their local language**
 
+
+
 ![License](https://img.shields.io/badge/license-MIT-green)
+
+
+
+
 ![PWA](https://img.shields.io/badge/PWA-Ready-blue)
+
+
+
+
 ![Offline](https://img.shields.io/badge/Offline-First-orange)
+
+
 
 ## 🚀 Features
 
@@ -50,7 +62,6 @@ When offline, the AI switches to a **Local Knowledge Base** with 100+ crop-speci
 
 ```bash
 # Clone the repository
-git clone 
 git clone https://github.com/btwvitznaresh/farmer.git
 
 # Navigate to project directory
@@ -64,19 +75,11 @@ npm run dev
 
 # Start the backend (in another terminal)
 npm run dev:backend
-```
-
-## 🔧 Environment Variables
-
-Create a `.env` file:
-```env
+🔧 Environment Variables
+Create a .env file:
 VITE_MANDI_API_KEY=your_api_key_here
 VITE_API_URL=http://localhost:3001
-```
-
-## 📁 Project Structure
-
-```
+📁 Project Structure
 farmer/
 ├── src/
 │   ├── components/     # React components
@@ -89,11 +92,7 @@ farmer/
 ├── backend_py/         # Python FastAPI backend
 ├── public/             # Static assets
 └── docs/               # Documentation
-```
-
-## 🧪 Testing
-
-```bash
+🧪 Testing
 # Run unit tests
 npm run test
 
@@ -105,12 +104,7 @@ npx tsc --noEmit
 
 # Linting
 npm run lint
-```
-
-## 👥 Team
-
+👥 Team
 Built with ❤️ for Indian farmers
-
-## 📄 License
-
+📄 License
 MIT License - feel free to use this project for educational purposes.
