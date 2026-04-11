@@ -79,3 +79,13 @@ backend_py/list_*.py
 backend_py/verify_*.py
 backend_py/discovery_results.txt
 backend_py/nvidia_models.json
+.env.production
+.env.local
+.env*.local
+*.pid
+.agrotalk_pid
+.firebase/
+__pycache__/
+*.pyc
+.DS_Store
+firebase-debug.log
