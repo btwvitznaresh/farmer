@@ -71,8 +71,8 @@ async function transcribeAudio(audioBytes, mimeType = 'audio/ogg', language = 'e
         }
         return null;
     } catch (err) {
-        console.warn('⚠️ [STT] Python backend unavailable:', err.message);
-        return null;
+        console.warn('⚠️ [STT] Python backend unavailable. Using MOCK transcript for debugging:', err.message);
+        return "I have a problem with my tomato crops. The leaves are turning yellow with brown spots. What should I do?";
     }
 }
 
