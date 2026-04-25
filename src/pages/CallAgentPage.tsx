@@ -75,12 +75,7 @@ export default function CallAgentPage() {
 
             const audioBlob = await getNvidiaTts(text, language, selectedVoice);
             if (!isActiveRef.current) return;
-            if (audioBlob) {
-                playResponse(text, undefined, audioBlob);
-            } else {
-                setCallState('idle');
-                startListening();
-            }
+            playResponse(text, undefined, audioBlob ?? undefined);
         }, 1500);
 
         return () => {
@@ -102,6 +97,7 @@ export default function CallAgentPage() {
             ttsAudio.pause();
             ttsAudio.src = "";
         }
+        window.speechSynthesis.cancel();
     };
 
     const endCall = () => {
@@ -217,13 +213,9 @@ export default function CallAgentPage() {
             const farewell = farewells[language] || farewells.en;
             try {
                 const audioBlob = await getNvidiaTts(farewell, language, selectedVoice);
-                if (audioBlob) {
-                    playResponse(farewell, undefined, audioBlob, true);
-                } else {
-                    onPlaybackEnd(true);
-                }
+                playResponse(farewell, undefined, audioBlob ?? undefined, true);
             } catch {
-                onPlaybackEnd(true);
+                playResponse(farewell, undefined, undefined, true);
             }
             return;
         }
@@ -326,7 +318,28 @@ export default function CallAgentPage() {
                 onPlaybackEnd(isExit);
             }
         } else {
-            onPlaybackEnd(isExit);
+            console.log("Falling back to browser TTS");
+            try {
+                const utterance = new SpeechSynthesisUtterance(text);
+                const langMap: Record<string, string> = {
+                    'hi': 'hi-IN', 'ta': 'ta-IN', 'te': 'te-IN', 'mr': 'mr-IN', 'en': 'en-US'
+                };
+                utterance.lang = langMap[language] || 'en-US';
+                
+                // Set voice if a matching one is available
+                const voices = window.speechSynthesis.getVoices();
+                const matchedVoice = voices.find(v => v.lang.startsWith(utterance.lang.split('-')[0]));
+                if (matchedVoice) {
+                    utterance.voice = matchedVoice;
+                }
+                
+                utterance.onend = () => onPlaybackEnd(isExit);
+                utterance.onerror = () => onPlaybackEnd(isExit);
+                window.speechSynthesis.speak(utterance);
+            } catch (e) {
+                console.error("Browser TTS failed:", e);
+                onPlaybackEnd(isExit);
+            }
         }
     };
 
