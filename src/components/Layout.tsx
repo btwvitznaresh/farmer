@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, ShoppingBag, Camera, BookOpen, Settings, ChevronLeft, ChevronRight, PhoneCall } from 'lucide-react';
+import { Home, ShoppingBag, Camera, BookOpen, Settings, ChevronLeft, ChevronRight, PhoneCall, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/contexts/AppContext';
 import { BottomNavigation, type NavTab } from '@/components/BottomNavigation';
@@ -14,6 +14,7 @@ interface LayoutProps {
 const NAV_ITEMS: { id: NavTab; icon: typeof Home; labelKey: string }[] = [
     { id: 'home',      icon: Home,        labelKey: 'home' },
     { id: 'market',    icon: ShoppingBag, labelKey: 'market' },
+    { id: 'services',  icon: Wrench,      labelKey: 'services' },
     { id: 'analyze',   icon: Camera,      labelKey: 'analyze' },
     { id: 'assistant', icon: PhoneCall,   labelKey: 'assistant' },
     { id: 'library',   icon: BookOpen,    labelKey: 'library' },
@@ -51,6 +52,7 @@ export function Layout({ children }: LayoutProps) {
     const tc = getTranslation('common', language);
 
     const getActiveTab = (): NavTab => {
+        if (location.pathname.startsWith('/services')) return 'services';
         switch (location.pathname) {
             case '/market':      return 'market';
             case '/library':     return 'library';
@@ -65,20 +67,21 @@ export function Layout({ children }: LayoutProps) {
 
     const handleTabChange = (tab: NavTab) => {
         const routes: Record<NavTab, string> = {
-            home: '/', market: '/market', library: '/library',
+            home: '/', market: '/market', services: '/services', library: '/library',
             settings: '/settings', analyze: '/analyze', assistant: '/call-agent',
         };
         navigate(routes[tab]);
     };
 
     const isCallAgent = location.pathname === '/call-agent';
-    // Sidebar always visible — call agent gets it too since it's now a nav item
-    const showSidebar = true;
-    // Bottom nav hides in chat mode and call agent
-    const showBottomNav = !isCallAgent && !isChatMode;
+    const isFullScreen = isCallAgent || location.pathname === '/analyze' || location.pathname === '/scan-history';
+    // Sidebar always visible — but not on full-screen pages
+    const showSidebar = !isFullScreen;
+    // Bottom nav hides in chat mode, call agent, and camera pages
+    const showBottomNav = !isFullScreen && !isChatMode;
 
     const sidebarLabels: Record<string, string> = {
-        home: t.home, market: t.market, analyze: (t as any).analyze || 'Scan Crop',
+        home: t.home, market: t.market, services: (t as any).services || 'Services', analyze: (t as any).analyze || 'Scan Crop',
         assistant: (t as any).assistant || 'Voice Agent', library: t.library, settings: t.settings
     };
 

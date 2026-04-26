@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Globe, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,10 +27,22 @@ export function LanguageSelector({
   onLanguageChange,
 }: LanguageSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const currentLang = languages.find((l) => l.code === selectedLanguage) || languages[0];
+  const handleLanguageChange = (rawCode: string) => {
+    const next = (rawCode || "").trim().toLowerCase();
+    const valid = languages.some((l) => l.code === next) ? next : "en";
+    onLanguageChange(valid);
+  };
+
+  useEffect(() => {
+    setIsAnimating(true);
+    const timer = setTimeout(() => setIsAnimating(false), 250);
+    return () => clearTimeout(timer);
+  }, [selectedLanguage]);
 
   return (
-    <div className="relative">
+    <div className={cn("relative transition-opacity duration-300", isAnimating && "opacity-70")}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
@@ -61,7 +73,7 @@ export function LanguageSelector({
                 <button
                   key={lang.code}
                   onClick={() => {
-                    onLanguageChange(lang.code);
+                    handleLanguageChange(lang.code);
                     setIsOpen(false);
                   }}
                   className={cn(

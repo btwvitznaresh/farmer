@@ -265,8 +265,8 @@ const client = new Client({
         dataPath: path.join(__dirname, '..', '.whatsapp_session')
     }),
     webVersionCache: {
-        type: 'remote',
-        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html'
+        type: 'local',
+        path: path.join(__dirname, '..', '.whatsapp_session', 'waweb_cache')
     },
     puppeteer: {
         headless: true,
@@ -277,8 +277,10 @@ const client = new Client({
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
-            '--single-process',
-            '--disable-gpu'
+            '--disable-gpu',
+            '--disable-features=IsolateOrigins,site-per-process',
+            '--allow-running-insecure-content',
+            '--disable-web-security'
         ]
     }
 });
@@ -374,7 +376,10 @@ client.on('message_create', async (msg) => {
 
 client.on('disconnected', (reason) => {
     console.log('⚠️  WhatsApp disconnected:', reason);
-    console.log('🔄 Reconnecting...');
+    console.log('🔄 Reconnecting in 5s...');
+    setTimeout(() => {
+        client.initialize().catch(err => console.error('Reconnect failed:', err.message));
+    }, 5000);
 });
 
 // Graceful shutdown

@@ -44,7 +44,14 @@ export function LibraryScreen({ weatherData, isWeatherLoading, onShareChat }: Li
   const { orders } = useOrders();
 
   const tLib = getTranslation('library', language);
-  const isHindi = language === 'hi';
+  const tabLabels: Record<string, { scans: string; chats: string; orders: string; loadingChats: string; noChats: string; chatsDesc: string }> = {
+    en: { scans: "Scans", chats: "Chats", orders: "Orders", loadingChats: "Loading chats...", noChats: "No Chats Yet", chatsDesc: "Your AI conversations will appear here." },
+    hi: { scans: "स्कैन", chats: "चैट", orders: "ऑर्डर", loadingChats: "चैट लोड हो रहे हैं...", noChats: "अभी कोई चैट नहीं", chatsDesc: "आपकी AI बातचीत यहाँ दिखाई देगी।" },
+    ta: { scans: "ஸ்கேன்", chats: "அரட்டை", orders: "ஆர்டர்கள்", loadingChats: "அரட்டைகள் ஏற்றப்படுகின்றன...", noChats: "இன்னும் அரட்டை இல்லை", chatsDesc: "உங்கள் AI உரையாடல்கள் இங்கே தோன்றும்." },
+    te: { scans: "స్కాన్లు", chats: "చాట్‌లు", orders: "ఆర్డర్లు", loadingChats: "చాట్‌లు లోడ్ అవుతున్నాయి...", noChats: "ఇంకా చాట్‌లు లేవు", chatsDesc: "మీ AI సంభాషణలు ఇక్కడ కనిపిస్తాయి." },
+    mr: { scans: "स्कॅन्स", chats: "चॅट", orders: "ऑर्डर्स", loadingChats: "चॅट्स लोड होत आहेत...", noChats: "अद्याप चॅट नाहीत", chatsDesc: "तुमच्या AI संभाषणांची यादी येथे दिसेल." },
+  };
+  const ui = tabLabels[language] || tabLabels.en;
 
   const getLocalizedField = (item: LibraryItem, field: 'diseaseName' | 'cropType' | 'summary' | 'description') => {
     const langSuffix = { hi: 'Hi', ta: 'Ta', te: 'Te', mr: 'Mr' }[language] || '';
@@ -207,7 +214,7 @@ export function LibraryScreen({ weatherData, isWeatherLoading, onShareChat }: Li
             )}
           >
             <LayoutGrid size={18} className={activeTab === "scans" ? "animate-pulse" : ""} />
-            {isHindi ? "स्कैन" : "Scans"}
+            {ui.scans}
           </button>
           <button
             onClick={() => setActiveTab("chats")}
@@ -219,7 +226,7 @@ export function LibraryScreen({ weatherData, isWeatherLoading, onShareChat }: Li
             )}
           >
             <MessageSquare size={18} className={activeTab === "chats" ? "animate-pulse" : ""} />
-            {isHindi ? "चैट" : "Chats"}
+            {ui.chats}
           </button>
           <button
             onClick={() => setActiveTab("orders")}
@@ -231,7 +238,7 @@ export function LibraryScreen({ weatherData, isWeatherLoading, onShareChat }: Li
             )}
           >
             <PackageOpen size={18} className={activeTab === "orders" ? "animate-pulse" : ""} />
-            {isHindi ? "ऑर्डर" : "Orders"}
+            {ui.orders}
           </button>
         </div>
 
@@ -240,15 +247,15 @@ export function LibraryScreen({ weatherData, isWeatherLoading, onShareChat }: Li
             {chatLoading ? (
               <div className="flex flex-col items-center justify-center py-20">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-3" />
-                <p className="text-sm text-muted-foreground">Loading chats...</p>
+                <p className="text-sm text-muted-foreground">{ui.loadingChats}</p>
               </div>
             ) : chatHistory.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-6">
                   <MessageSquare className="w-10 h-10 text-primary/40" />
                 </div>
-                <h3 className="text-headline font-bold text-foreground mb-2">No Chats Yet</h3>
-                <p className="text-body text-muted-foreground max-w-[240px]">Your AI conversations will appear here.</p>
+                <h3 className="text-headline font-bold text-foreground mb-2">{ui.noChats}</h3>
+                <p className="text-body text-muted-foreground max-w-[240px]">{ui.chatsDesc}</p>
               </div>
             ) : (
               chatHistory.map((item) => {

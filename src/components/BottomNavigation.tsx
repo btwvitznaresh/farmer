@@ -1,8 +1,8 @@
-import { Home, Camera, BookOpen, Settings, ShoppingBag } from "lucide-react";
+import { Home, Camera, BookOpen, Settings, ShoppingBag, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getTranslation } from "@/lib/translations";
 
-export type NavTab = "home" | "analyze" | "library" | "settings" | "assistant" | "market";
+export type NavTab = "home" | "analyze" | "library" | "settings" | "assistant" | "market" | "services";
 
 interface BottomNavigationProps {
   activeTab: NavTab;
@@ -12,10 +12,15 @@ interface BottomNavigationProps {
 
 export function BottomNavigation({ activeTab, onTabChange, language = 'en' }: BottomNavigationProps) {
   const t = getTranslation('nav', language);
+  const handleTabPress = (tab: NavTab) => {
+    if (navigator.vibrate) navigator.vibrate(10);
+    onTabChange(tab);
+  };
 
   const tabs: { id: NavTab; icon: typeof Home; label: string }[] = [
     { id: "home",     icon: Home,        label: t.home },
     { id: "market",   icon: ShoppingBag, label: t.market },
+    { id: "services", icon: Wrench,      label: (t as any).services || "Services" },
     { id: "analyze",  icon: Camera,      label: t.analyze },
     { id: "library",  icon: BookOpen,    label: t.library },
     { id: "settings", icon: Settings,    label: t.settings },
@@ -42,10 +47,10 @@ export function BottomNavigation({ activeTab, onTabChange, language = 'en' }: Bo
             return (
               <button
                 key={id}
-                onClick={() => onTabChange(id)}
+                onClick={() => handleTabPress(id)}
                 className={cn(
                   "relative flex flex-col items-center justify-center gap-1 transition-all duration-300",
-                  "focus:outline-none active:scale-90 touch-none",
+                  "focus:outline-none active:scale-95 touch-none",
                   isAnalyze ? "w-14 h-14" : "flex-1 py-2"
                 )}
                 aria-label={label}
@@ -65,14 +70,14 @@ export function BottomNavigation({ activeTab, onTabChange, language = 'en' }: Bo
                     {/* Icon with active background pill */}
                     <div className={cn(
                       "flex items-center justify-center w-10 h-8 rounded-xl transition-all duration-300",
-                      isActive ? "bg-primary/12" : ""
+                      isActive ? "bg-primary text-white" : ""
                     )}>
                       <Icon
                         size={20}
                         strokeWidth={isActive ? 2.5 : 1.8}
                         className={cn(
                           "transition-all duration-300",
-                          isActive ? "text-primary" : "text-muted-foreground/60"
+                          isActive ? "text-white fill-white" : "text-muted-foreground/60"
                         )}
                       />
                     </div>
@@ -82,10 +87,6 @@ export function BottomNavigation({ activeTab, onTabChange, language = 'en' }: Bo
                     )}>
                       {label}
                     </span>
-                    {/* Active dot */}
-                    {isActive && (
-                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
-                    )}
                   </>
                 )}
               </button>

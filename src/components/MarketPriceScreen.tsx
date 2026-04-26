@@ -96,6 +96,14 @@ export const MarketPriceScreen: React.FC<MarketPriceScreenProps> = ({ language, 
 
     const t = getTranslation('market', language);
     const tCommon = getTranslation('common', language);
+    const marketUi: Record<string, { homeDelivery: string; processingOrder: string; supplyName: string; orderPlaced: string; orderHint: string }> = {
+        en: { homeDelivery: "Home Delivery", processingOrder: "Processing Order", supplyName: "AgroTalk Supply", orderPlaced: "Order Placed!", orderHint: "View in Library -> Agent Orders" },
+        hi: { homeDelivery: "घर तक डिलीवरी", processingOrder: "ऑर्डर प्रोसेस हो रहा है", supplyName: "AgroTalk सप्लाई", orderPlaced: "ऑर्डर दिया गया!", orderHint: "लाइब्रेरी -> एजेंट ऑर्डर में देखें" },
+        ta: { homeDelivery: "வீட்டு டெலிவரி", processingOrder: "ஆர்டர் செயலாக்கம்", supplyName: "AgroTalk சப்ளை", orderPlaced: "ஆர்டர் செய்யப்பட்டுவிட்டது!", orderHint: "நூலகம் -> ஏஜென்ட் ஆர்டர்கள் பார்க்கவும்" },
+        te: { homeDelivery: "ఇంటి డెలివరీ", processingOrder: "ఆర్డర్ ప్రాసెస్‌లో ఉంది", supplyName: "AgroTalk సప్లై", orderPlaced: "ఆర్డర్ పెట్టబడింది!", orderHint: "లైబ్రరీ -> ఏజెంట్ ఆర్డర్లు చూడండి" },
+        mr: { homeDelivery: "घरी डिलिव्हरी", processingOrder: "ऑर्डर प्रक्रिया सुरू", supplyName: "AgroTalk सप्लाय", orderPlaced: "ऑर्डर नोंदवला!", orderHint: "लायब्ररी -> एजंट ऑर्डर्स मध्ये पहा" },
+    };
+    const ui = marketUi[language] || marketUi.en;
 
     // Robust Data Normalization
     const normalizeRecord = (record: MandiPriceRecord): MandiPriceRecord => {
@@ -408,13 +416,13 @@ export const MarketPriceScreen: React.FC<MarketPriceScreenProps> = ({ language, 
             id: `ord_${Date.now()}`,
             crop: product.name,
             quantity: "1 Unit",
-            location: "Home Delivery",
+            location: ui.homeDelivery,
             price_estimate: `₹${product.price}`,
-            status: "Processing Order",
-            buyer_name: "AgroTalk Supply",
+            status: ui.processingOrder,
+            buyer_name: ui.supplyName,
             timestamp: Date.now()
         });
-        toast.success("Order Placed!", { description: "View in Library -> Agent Orders" });
+        toast.success(ui.orderPlaced, { description: ui.orderHint });
     };
 
     const handleAskAI = (product: StoreProduct) => {

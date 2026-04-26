@@ -73,10 +73,23 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const API_BASE_URL = 'http://localhost:3001';
+const SUPPORTED_LANGUAGES = ['en', 'hi', 'ta', 'te', 'mr'] as const;
+
+function normalizeLanguageCode(lang: string): string {
+    const normalized = (lang || '').toLowerCase().trim();
+    if ((SUPPORTED_LANGUAGES as readonly string[]).includes(normalized)) return normalized;
+
+    if (normalized.includes('hindi')) return 'hi';
+    if (normalized.includes('tamil') || normalized.includes('tamizh') || normalized.includes('thamil')) return 'ta';
+    if (normalized.includes('telugu')) return 'te';
+    if (normalized.includes('marathi')) return 'mr';
+    if (normalized.includes('english')) return 'en';
+    return 'en';
+}
 
 export function AppProvider({ children }: { children: ReactNode }) {
     // Language & Voice
-    const [language, setLanguage] = useState(() => localStorage.getItem('agro_language') || 'en');
+    const [language, setLanguageState] = useState(() => normalizeLanguageCode(localStorage.getItem('agro_language') || 'en'));
     const [voiceSpeed, setVoiceSpeed] = useState<'slow' | 'normal' | 'fast'>('normal');
     const [selectedVoice, setSelectedVoice] = useState(() => localStorage.getItem('agrovoice_voice') || 'mia');
     const [isMuted, setIsMuted] = useState(() => localStorage.getItem('agrovoice_muted') === 'true');
@@ -112,6 +125,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('agro_language', language);
         (window as any).setGlobalLanguage = setLanguage;
     }, [language]);
+
+    const setLanguage = (lang: string) => {
+        const nextLang = normalizeLanguageCode(lang);
+        setLanguageState(nextLang);
+        try {
+            const i18n = (window as any).i18n;
+            if (i18n && typeof i18n.changeLanguage === 'function') {
+                i18n.changeLanguage(nextLang);
+            }
+        } catch (error) {
+            console.warn('Language switch hook failed:', error);
+        }
+    };
 
     // Persist voice selection
     useEffect(() => {

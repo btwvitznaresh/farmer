@@ -1494,6 +1494,7 @@ export const translations = {
       library: "Library",
       settings: "Settings",
       market: "Market",
+      services: "Services",
     },
     hi: {
       home: "होम",
@@ -1502,6 +1503,7 @@ export const translations = {
       library: "लाइब्रेरी",
       settings: "सेटिंग्स",
       market: "मंडी",
+      services: "सेवाएं",
     },
     ta: {
       home: "முகப்பு",
@@ -1510,6 +1512,7 @@ export const translations = {
       library: "நூலகம்",
       settings: "அமைப்புகள்",
       market: "சந்தை",
+      services: "சேவைகள்",
     },
     te: {
       home: "హోమ్",
@@ -1518,6 +1521,7 @@ export const translations = {
       library: "లైబ్రరీ",
       settings: "సెట్టింగ్‌లు",
       market: "మార్కెట్",
+      services: "సేవలు",
     },
     mr: {
       home: "होम",
@@ -1526,7 +1530,16 @@ export const translations = {
       library: "लायब्ररी",
       settings: "सेटिंग्ज",
       market: "मंडी",
+      services: "सेवा",
     },
+  },
+
+  services: {
+    en: { ourServices: "Our Services", weCome: "We come to your farm", bookNow: "Book Now", view: "View" },
+    hi: { ourServices: "हमारी सेवाएं", weCome: "हम आपके खेत पर आते हैं", bookNow: "अभी बुक करें", view: "देखें" },
+    ta: { ourServices: "எங்கள் சேவைகள்", weCome: "நாங்கள் உங்கள் பண்ணைக்கு வருகிறோம்", bookNow: "இப்போது பதிவு செய்", view: "பார்" },
+    te: { ourServices: "మా సేవలు", weCome: "మేమే మీ ఫారంకు వస్తాం", bookNow: "ఇప్పుడే బుక్ చేయండి", view: "చూడండి" },
+    mr: { ourServices: "आमच्या सेवा", weCome: "आम्ही तुमच्या शेतात येतो", bookNow: "आता बुक करा", view: "पाहा" },
   },
 
   // Offline Banner

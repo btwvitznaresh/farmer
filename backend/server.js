@@ -22,6 +22,7 @@ const weatherRoute = require('./routes/weather');
 const chatRoute = require('./routes/chat');
 const marketRoute = require('./routes/market');
 const ttsRoute = require('./routes/tts');
+const agentRoute = require('./routes/agent');
 
 
 const app = express();
@@ -61,6 +62,7 @@ app.use('/library', libraryRoute);
 app.use('/chat', chatRoute);
 app.use('/market', marketRoute);
 app.use('/api/tts', ttsRoute);
+app.use('/agent', agentRoute);
 
 // Serve uploads (local only)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -72,7 +74,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`\n🌱 AgroTalk Backend running on port ${PORT}`);
     console.log(`   OpenRouter: ${process.env.OPENROUTER_API_KEY ? '✅' : '❌ missing'}`);
     console.log(`   NVIDIA Vision: ${process.env.NVIDIA_VISION_KEY ? '✅' : '❌ missing'}`);
@@ -91,4 +93,14 @@ app.listen(PORT, () => {
             });
     };
     setTimeout(tryWarm, 1000);
+});
+
+server.on('error', (err) => {
+    if (err && err.code === 'EADDRINUSE') {
+        console.error(`\n❌ Port ${PORT} is already in use.`);
+        console.error('   Stop the existing backend process or set a different PORT.\n');
+        process.exit(1);
+    }
+    console.error('\n❌ Backend failed to start:', err);
+    process.exit(1);
 });

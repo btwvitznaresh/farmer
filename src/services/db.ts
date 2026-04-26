@@ -90,10 +90,35 @@ interface AgroTalkDB extends DBSchema {
         };
         indexes: { 'by-timestamp': number };
     };
+    service_bookings: {
+        key: string;
+        value: {
+            id: string;
+            serviceId: string;
+            serviceName: string;
+            category: string;
+            farmerName: string;
+            farmLocation: string;
+            village: string;
+            specialInstructions: string;
+            scheduleDate: string;
+            timeSlot: 'morning' | 'afternoon' | 'evening';
+            status: 'pending' | 'confirmed' | 'in-progress' | 'completed';
+            assignedMember: string;
+            priceMin: number;
+            priceMax: number;
+            reportSummary?: string;
+            reportPhotos?: string[];
+            reportRecommendations?: string[];
+            createdAt: number;
+            updatedAt: number;
+        };
+        indexes: { 'by-status': string; 'by-updatedAt': number };
+    };
 }
 
 const DB_NAME = 'agrotalk-db';
-const DB_VERSION = 3; // bumped: ensures agent_orders store is created for all users
+const DB_VERSION = 4; // bumped: adds service_bookings store
 
 export const dbService = {
     dbPromise: null as Promise<IDBPDatabase<AgroTalkDB>> | null,
@@ -141,6 +166,13 @@ export const dbService = {
                     if (!db.objectStoreNames.contains('agent_orders')) {
                         const ordersStore = db.createObjectStore('agent_orders', { keyPath: 'id' });
                         ordersStore.createIndex('by-timestamp', 'timestamp');
+                    }
+
+                    // Service Bookings Store
+                    if (!db.objectStoreNames.contains('service_bookings')) {
+                        const bookingsStore = db.createObjectStore('service_bookings', { keyPath: 'id' });
+                        bookingsStore.createIndex('by-status', 'status');
+                        bookingsStore.createIndex('by-updatedAt', 'updatedAt');
                     }
                 },
             });
