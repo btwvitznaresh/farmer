@@ -8,7 +8,7 @@
     "dev": "vite",
     "dev:backend": "cd backend && node server.js",
     "dev:whatsapp": "node backend/whatsapp_bridge.js",
-    "dev:python": "cd backend_py && python3 main.py",
+    "dev:python": "cd backend_py && python main.py",
     "dev:full": "concurrently \"npm run dev:backend\" \"npm run dev\"",
     "dev:full:wa": "concurrently \"npm run dev:backend\" \"npm run dev\" \"npm run dev:whatsapp\" \"npm run dev:python\"",
     "build": "vite build",

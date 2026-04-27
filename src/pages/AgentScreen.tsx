@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mic, PhoneOff, Volume2, VolumeX, ArrowLeft, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/contexts/AppContext';
 import { getNvidiaTts } from '@/lib/apiClient';
 import { toast } from 'sonner';
+
+// Lazy-load heavy Three.js scene to avoid blocking initial render
+const FarmScene = lazy(() => import('@/three/FarmScene'));
 import { callArjunAgent, fetchArjunGreeting } from '@/agent/ArjunApiClient';
 import {
     AgentMemory,
@@ -473,9 +476,22 @@ export default function AgentScreen() {
     // ── Render ────────────────────────────────────────────────────────────
     return (
         <div className="flex flex-col h-screen bg-black text-white overflow-hidden relative select-none">
-            {/* Background gradient */}
-            <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-black to-black" />
-            <div className="absolute inset-0 pointer-events-none"
+            {/* 3D Holographic background (Three.js) */}
+            <Suspense fallback={
+                <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-black to-black" />
+            }>
+                <FarmScene
+                    preset="agentAvatar"
+                    showFireflies={true}
+                    particleCount={400}
+                    particleMode="sparkles"
+                    showHologram={true}
+                    className="absolute inset-0 z-0"
+                    style={{ opacity: 0.6 }}
+                />
+            </Suspense>
+            {/* Fallback gradient overlay for contrast */}
+            <div className="absolute inset-0 pointer-events-none z-[1]"
                 style={{ background: 'radial-gradient(circle at 50% 40%, rgba(118,185,0,0.07) 0%, transparent 65%)' }} />
 
             {/* Header */}

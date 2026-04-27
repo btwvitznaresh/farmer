@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense } from 'react';
+
+// Lazy-load Three.js 3D scene for premium splash background
+const FarmScene = lazy(() => import('@/three/FarmScene'));
 
 /* ──────────────────────────────────────────────────────
    AgroTalk 3D Splash Screen
@@ -144,11 +147,24 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       className="splash-root"
       style={{ opacity: phase === 'out' ? 0 : 1, transition: phase === 'out' ? 'opacity 0.7s cubic-bezier(0.4,0,0.2,1)' : 'none' }}
     >
-      {/* Particle canvas */}
-      <canvas ref={canvasRef} className="splash-canvas" />
+      {/* 3D WebGL background scene (lowest layer) */}
+      <Suspense fallback={null}>
+        <FarmScene
+          preset="splash"
+          showFireflies={true}
+          particleCount={400}
+          particleMode="pollen"
+          showHologram={false}
+          className="absolute inset-0 z-0"
+          style={{ opacity: 0.4 }}
+        />
+      </Suspense>
+
+      {/* Particle canvas (2D overlay on top of 3D) */}
+      <canvas ref={canvasRef} className="splash-canvas" style={{ position: 'relative', zIndex: 1 }} />
 
       {/* Gradient BG */}
-      <div className="splash-bg" />
+      <div className="splash-bg" style={{ zIndex: 2 }} />
 
       {/* Animated grid lines */}
       <div className="splash-grid" />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, RefreshCw, X, Zap, History, AlertTriangle, CheckCircle2, ChevronRight, Leaf, Bug, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,9 @@ import {
 } from '@/services/cropDiseaseService';
 import { getDiseaseNameInLanguage } from '@/data/diseaseLabels';
 import { toast } from 'sonner';
+
+// Lazy-load Three.js scene for background ambience
+const FarmScene = lazy(() => import('@/three/FarmScene'));
 
 // ── Severity badge ──────────────────────────────────────────────────────────
 function SeverityBadge({ severity }: { severity: string }) {
@@ -347,16 +350,29 @@ export default function CropScanPage() {
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
+      {/* 3D Farm scene background (visible behind camera + during loading) */}
+      <Suspense fallback={null}>
+        <FarmScene
+          preset="farmScan"
+          showFireflies={true}
+          particleCount={300}
+          particleMode="fireflies"
+          showHologram={false}
+          className="absolute inset-0 z-0"
+          style={{ opacity: 0.35 }}
+        />
+      </Suspense>
+
       {/* Camera feed */}
       <video
         ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover z-[1]"
         playsInline
         muted
       />
 
       {/* Dark vignette overlay */}
-      <div className="absolute inset-0 pointer-events-none"
+      <div className="absolute inset-0 pointer-events-none z-[2]"
         style={{ background: 'radial-gradient(circle at center, transparent 35%, rgba(0,0,0,0.6) 100%)' }} />
 
       {/* Scan frame overlay */}
