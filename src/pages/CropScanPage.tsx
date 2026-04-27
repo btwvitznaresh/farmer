@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, RefreshCw, X, Zap, History, AlertTriangle, CheckCircle2, ChevronRight, Leaf, Bug } from 'lucide-react';
+import { Camera, RefreshCw, X, Zap, History, AlertTriangle, CheckCircle2, ChevronRight, Leaf, Bug, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/contexts/AppContext';
 import {
@@ -159,6 +159,7 @@ export default function CropScanPage() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [cameraReady, setCameraReady] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -259,6 +260,69 @@ export default function CropScanPage() {
     }
   }, [cameraReady, scanning, language]);
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setScanning(true);
+    setResult(null);
+    setLowConfidence(false);
+
+    try {
+      const img = new window.Image();
+      img.src = URL.createObjectURL(file);
+      await new Promise((resolve) => { img.onload = resolve; });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(img, 0, 0);
+
+      let scanResult = await classifyImage(canvas);
+
+      if (!scanResult) {
+        // Fallback: use backend vision API
+        const form = new FormData();
+        form.append('image', file, 'scan.jpg');
+        const res = await fetch('http://localhost:3001/analyze-image', { method: 'POST', body: form });
+        const data = await res.json();
+        if (data.success && data.data) {
+          toast.info('Used cloud analysis (model not loaded)');
+        }
+        setScanning(false);
+        return;
+      }
+
+      if (scanResult.confidence < 0.60) {
+        setLowConfidence(true);
+        setScanning(false);
+        return;
+      }
+
+      // Save to history
+      saveScanToHistory({
+        id: `scan_${Date.now()}`,
+        timestamp: Date.now(),
+        cropName: scanResult.label.crop,
+        diseaseName: scanResult.label.disease,
+        severity: scanResult.label.severity,
+        confidence: scanResult.confidence,
+        isHealthy: scanResult.label.isHealthy,
+        imageDataUrl: canvas.toDataURL('image/jpeg', 0.4),
+        language,
+      });
+
+      setResult(scanResult);
+    } catch (e) {
+      console.error('[Upload] Error:', e);
+      toast.error('Image analysis failed. Please try again.');
+    } finally {
+      setScanning(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleRetake = () => {
     setResult(null);
     setLowConfidence(false);
@@ -346,9 +410,30 @@ export default function CropScanPage() {
         </div>
       )}
 
-      {/* Capture button — shown when no result */}
+      {/* Capture and Upload buttons — shown when no result */}
       {!result && (
-        <div className="absolute bottom-16 left-0 right-0 flex justify-center z-20">
+        <div className="absolute bottom-16 left-0 right-0 flex justify-center z-20 items-end gap-8">
+          <input 
+            type="file" 
+            accept="image/*" 
+            ref={fileInputRef} 
+            onChange={handleImageUpload} 
+            className="hidden" 
+          />
+          
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={scanning}
+            className="flex flex-col items-center transition-all active:scale-95 disabled:opacity-50 mb-2"
+          >
+            <div className="w-14 h-14 rounded-full flex items-center justify-center bg-white/10 border border-white/20 backdrop-blur-md">
+              <Upload size={24} className="text-white" />
+            </div>
+            <p className="text-center text-white/50 text-xs mt-2 font-semibold">
+              Upload
+            </p>
+          </button>
+
           <button
             onClick={handleScan}
             disabled={!cameraReady || scanning}
@@ -371,6 +456,9 @@ export default function CropScanPage() {
               {scanning ? 'Scanning...' : 'Tap to Scan'}
             </p>
           </button>
+          
+          {/* Spacer to balance layout */}
+          <div className="w-14 h-14 mb-2 opacity-0 pointer-events-none" />
         </div>
       )}
 

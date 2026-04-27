@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout";
+import SplashScreen from "@/components/SplashScreen";
 import HomePage from "./pages/HomePage";
 import MarketPage from "./pages/MarketPage";
 import LibraryPage from "./pages/LibraryPage";
@@ -89,19 +91,25 @@ function ProtectedApp() {
   );
 }
 
-const App = () => (
-  <PersistQueryClientProvider
-    client={queryClient}
-    persistOptions={{ persister }}
-  >
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <ProtectedApp />
-      </AuthProvider>
-    </TooltipProvider>
-  </PersistQueryClientProvider>
-);
+const App = () => {
+  const [splashDone, setSplashDone] = useState(false);
+  const handleSplashComplete = useCallback(() => setSplashDone(true), []);
+
+  return (
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister }}
+    >
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        {!splashDone && <SplashScreen onComplete={handleSplashComplete} />}
+        <AuthProvider>
+          <ProtectedApp />
+        </AuthProvider>
+      </TooltipProvider>
+    </PersistQueryClientProvider>
+  );
+};
 
 export default App;

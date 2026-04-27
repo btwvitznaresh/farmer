@@ -23,6 +23,7 @@ const chatRoute = require('./routes/chat');
 const marketRoute = require('./routes/market');
 const ttsRoute = require('./routes/tts');
 const agentRoute = require('./routes/agent');
+const bookingsRoute = require('./routes/bookings');
 
 
 const app = express();
@@ -63,6 +64,7 @@ app.use('/chat', chatRoute);
 app.use('/market', marketRoute);
 app.use('/api/tts', ttsRoute);
 app.use('/agent', agentRoute);
+app.use('/api/bookings', bookingsRoute);
 
 // Serve uploads (local only)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
