@@ -63,10 +63,13 @@ function AvatarRing({ state, mood }: { state: AgentState; mood: AvatarMood }) {
                     boxShadow: `0 0 40px ${ringColor}, 0 0 80px ${ringColor}30`
                 }}
             >
-                {/* Arjun initials / avatar */}
-                <div className="flex flex-col items-center gap-1 select-none">
-                    <span className="text-5xl font-black" style={{ color: '#76b900', textShadow: '0 0 20px #76b90060' }}>A</span>
-                    <span className="text-[10px] tracking-[0.3em] font-bold text-white/40 uppercase">Arjun</span>
+                {/* AgroTalk Logo Avatar */}
+                <div className="w-full h-full overflow-hidden rounded-full">
+                  <img 
+                    src="/logo.svg" 
+                    alt="AgroTalk Logo" 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} 
+                  />
                 </div>
 
                 {/* State overlay */}
@@ -485,7 +488,7 @@ export default function AgentScreen() {
                     showFireflies={true}
                     particleCount={400}
                     particleMode="sparkles"
-                    showHologram={true}
+                    showHologram={false}
                     className="absolute inset-0 z-0"
                     style={{ opacity: 0.6 }}
                 />

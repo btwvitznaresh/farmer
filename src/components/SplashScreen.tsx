@@ -21,7 +21,7 @@ interface Particle {
   color: string;
 }
 
-const GREENS = ['#76b900', '#5d9200', '#a3d900', '#2e7d00', '#4caf50'];
+const GREENS = ['#3aff6a', '#2be75c', '#35f866', '#1fd04d', '#4caf50'];
 
 function useParticleCanvas(active: boolean) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -161,7 +161,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       </Suspense>
 
       {/* Particle canvas (2D overlay on top of 3D) */}
-      <canvas ref={canvasRef} className="splash-canvas" style={{ position: 'relative', zIndex: 1 }} />
+      <canvas ref={canvasRef} className="splash-canvas" style={{ position: 'absolute', zIndex: 1 }} />
 
       {/* Gradient BG */}
       <div className="splash-bg" style={{ zIndex: 2 }} />
@@ -241,7 +241,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           align-items: center;
           justify-content: center;
           overflow: hidden;
-          background: #030a02;
+          background: #020a02;
         }
         .splash-canvas {
           position: absolute;
@@ -262,8 +262,8 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           position: absolute;
           inset: 0;
           background-image:
-            linear-gradient(rgba(118,185,0,0.06) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(118,185,0,0.06) 1px, transparent 1px);
+            linear-gradient(rgba(58,255,106,0.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(58,255,106,0.06) 1px, transparent 1px);
           background-size: 60px 60px;
           transform: perspective(600px) rotateX(55deg) translateY(30%);
           transform-origin: center bottom;
@@ -278,19 +278,19 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         }
         .splash-orb-1 {
           width: 400px; height: 400px;
-          background: rgba(118,185,0,0.12);
+          background: rgba(58,255,106,0.12);
           top: -100px; left: -100px;
           animation: orb-float 7s ease-in-out infinite;
         }
         .splash-orb-2 {
           width: 300px; height: 300px;
-          background: rgba(76,175,80,0.10);
+          background: rgba(58,255,106,0.10);
           bottom: -80px; right: -80px;
           animation: orb-float 9s 2s ease-in-out infinite reverse;
         }
         .splash-orb-3 {
           width: 200px; height: 200px;
-          background: rgba(118,185,0,0.15);
+          background: rgba(58,255,106,0.15);
           top: 40%; right: 15%;
           animation: orb-float 6s 1s ease-in-out infinite;
         }
@@ -305,7 +305,8 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           inset: 0;
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-start;
+          padding-left: 15%;
           pointer-events: none;
         }
         .splash-cube-scene {
@@ -325,8 +326,8 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         .splash-cube__face {
           position: absolute;
           width: 260px; height: 260px;
-          border: 1.5px solid rgba(118,185,0,0.18);
-          background: rgba(118,185,0,0.025);
+          border: 1.5px solid rgba(58,255,106,0.18);
+          background: rgba(58,255,106,0.025);
           backdrop-filter: blur(2px);
         }
         .splash-cube__face--front  { transform: rotateY(  0deg) translateZ(130px); }
@@ -350,7 +351,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         .splash-ring {
           position: absolute;
           border-radius: 50%;
-          border: 1px solid rgba(118,185,0,0.3);
+          border: 1px solid rgba(58,255,106,0.3);
           pointer-events: none;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
@@ -381,7 +382,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           font-weight: 900;
           letter-spacing: 0.04em;
           color: #fff;
-          text-shadow: 0 0 32px rgba(118,185,0,0.5), 0 0 8px rgba(118,185,0,0.3);
+          text-shadow: 0 0 32px rgba(58,255,106,0.5), 0 0 8px rgba(58,255,106,0.3);
           margin: 0;
           line-height: 1;
         }
@@ -394,10 +395,14 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           font-family: 'Inter', system-ui, sans-serif;
           font-size: 0.85rem;
           font-weight: 500;
-          color: rgba(118,185,0,0.75);
+          color: #3aff6a;
           letter-spacing: 0.18em;
           text-transform: uppercase;
           margin: 8px 0 0;
+          position: relative;
+          font-family: 'SF Mono', 'Courier New', monospace;
+          
+
         }
 
         /* Loading bar */
