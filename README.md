@@ -2,21 +2,11 @@
 
 > **Voice-first AI assistant helping farmers with agricultural advice in their local language**
 
-
-
 ![License](https://img.shields.io/badge/license-MIT-green)
-
-
-
-
 ![PWA](https://img.shields.io/badge/PWA-Ready-blue)
-
-
-
-
 ![Offline](https://img.shields.io/badge/Offline-First-orange)
 
-
+---
 
 ## 🚀 Features
 
@@ -27,6 +17,8 @@
 - **📚 Library**: Save and review past diagnoses and analyses
 - **🌐 Multi-language Support**: Full UI localization in 5 Indian languages
 - **📱 PWA/Installable**: Works as a native app on Android, iOS, and Desktop
+
+---
 
 ## 🌍 Offline-First Architecture
 
@@ -45,6 +37,8 @@ AgroTalk Assist is designed for low-connectivity rural environments:
 ### 🧠 Local Wisdom (Offline AI)
 When offline, the AI switches to a **Local Knowledge Base** with 100+ crop-specific Q&A entries covering common diseases, treatments, and farming advice.
 
+---
+
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
@@ -58,6 +52,8 @@ When offline, the AI switches to a **Local Knowledge Base** with 100+ crop-speci
 | Database | IndexedDB (idb) |
 | PWA | vite-plugin-pwa, Workbox |
 
+---
+
 ## 📦 Installation
 
 ```bash
@@ -67,19 +63,46 @@ git clone https://github.com/btwvitznaresh/farmer.git
 # Navigate to project directory
 cd farmer
 
-# Install dependencies
-npm install
+# Install ALL dependencies (frontend + backend) — run this once after cloning
+npm run install:all
+```
 
-# Start the development server
+> **Note:** Run `npm run install:all` once after cloning to install both the root and backend dependencies. You only need to run plain `npm install` again if you add new root packages.
+
+---
+
+## 🔧 Development
+
+```bash
+# Start frontend only
 npm run dev
 
-# Start the backend (in another terminal)
+# Start backend only (in a separate terminal)
 npm run dev:backend
-🔧 Environment Variables
-Create a .env file:
+
+# Start both frontend + backend together
+npm run dev:full
+
+# Start Python backend
+npm run dev:python
+```
+
+---
+
+## 🔧 Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
 VITE_MANDI_API_KEY=your_api_key_here
 VITE_API_URL=http://localhost:3001
-📁 Project Structure
+```
+
+---
+
+## 📁 Project Structure
+
+```
 farmer/
 ├── src/
 │   ├── components/     # React components
@@ -92,7 +115,13 @@ farmer/
 ├── backend_py/         # Python FastAPI backend
 ├── public/             # Static assets
 └── docs/               # Documentation
-🧪 Testing
+```
+
+---
+
+## 🧪 Testing
+
+```bash
 # Run unit tests
 npm run test
 
@@ -104,7 +133,25 @@ npx tsc --noEmit
 
 # Linting
 npm run lint
-👥 Team
+```
+
+---
+
+## 🚀 Deployment
+
+```bash
+# Build and deploy to Firebase
+npm run deploy
+```
+
+---
+
+## 👥 Team
+
 Built with ❤️ for Indian farmers
-📄 License
-MIT License - feel free to use this project for educational purposes.
+
+---
+
+## 📄 License
+
+MIT License — feel free to use this project for educational purposes.
