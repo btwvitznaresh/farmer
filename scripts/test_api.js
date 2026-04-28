@@ -1,5 +1,9 @@
 async function testApi() {
-    const API_KEY = '579b464db66ec23bdd000001fe9d36968d1d4e8e62fee0cc92cefecd';
+    const API_KEY = process.env.MANDI_API_KEY;
+    if (!API_KEY) {
+        console.error('Missing env var: MANDI_API_KEY');
+        process.exit(1);
+    }
     const BASE_URL = 'https://api.data.gov.in/resource/9ef275ee-e289-487b-80a2-8c8d8dcb4545';
     const url = `${BASE_URL}?api-key=${API_KEY}&format=json&limit=5`;
 

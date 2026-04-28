@@ -174,13 +174,13 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       <div className="splash-orb splash-orb-2" />
       <div className="splash-orb splash-orb-3" />
 
-      {/* 3D rotating wireframe cube */}
-      <div className="splash-cube-wrapper">
-        <Cube3D />
-      </div>
-
       {/* Center content */}
       <div className="splash-center">
+        {/* Cube behind logo */}
+        <div className="splash-cube-behind">
+          <Cube3D />
+        </div>
+
         {/* Ring pulse */}
         <div className="splash-ring splash-ring-1" />
         <div className="splash-ring splash-ring-2" />
@@ -300,14 +300,16 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         }
 
         /* ── 3D cube ── */
-        .splash-cube-wrapper {
+        .splash-cube-behind {
           position: absolute;
           inset: 0;
           display: flex;
           align-items: center;
-          justify-content: flex-start;
-          padding-left: 15%;
+          justify-content: center;
           pointer-events: none;
+          z-index: 0;
+          opacity: 0.85;
+          transform: translateY(-6px);
         }
         .splash-cube-scene {
           width: 260px; height: 260px;
@@ -355,6 +357,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           pointer-events: none;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
+          z-index: 1;
         }
         .splash-ring-1 { width: 140px; height: 140px; animation: ring-pulse 2.5s 0.0s ease-out infinite; }
         .splash-ring-2 { width: 180px; height: 180px; animation: ring-pulse 2.5s 0.5s ease-out infinite; }
