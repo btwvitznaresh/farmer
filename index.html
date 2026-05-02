@@ -1,60 +1,1281 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>AgroTalk - AI Assistant for Farmers</title>
-  <meta name="description"
-    content="Voice-first AI assistant helping farmers with agricultural advice in their local language" />
-  <meta name="author" content="AgroTalk" />
-  <meta name="theme-color" content="#2D5016" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KisanMittra — Smart Farmer Platform</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #020f0a;
+    --bg2: #041208;
+    --card: rgba(0, 255, 100, 0.04);
+    --card-hover: rgba(0, 255, 100, 0.08);
+    --border: rgba(0, 200, 80, 0.18);
+    --border-light: rgba(0, 200, 80, 0.3);
+    --fg: #ffffff;
+    --fg2: rgba(255,255,255,0.8);
+    --muted: rgba(255,255,255,0.6);
+    --accent: #00c853;
+    --accent2: #4caf50;
+    --accent-glow: rgba(0,200,80,0.25);
+    --gold: #ffab00;
+    --gold-dim: #ff8f00;
+    --red: #f87171;
+    --blue: #38bdf8;
+    --purple: #a78bfa;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; scrollbar-width:thin; scrollbar-color: var(--accent) var(--bg); }
+  body { font-family:'Outfit',sans-serif; background:var(--bg); color:var(--fg); overflow-x:hidden; line-height:1.6; }
+  h1,h2,h3,h4,h5 { font-family:'Outfit',sans-serif; line-height:1.12; }
+  canvas { display:block; }
+  
+  section { padding: 100px 3rem 5rem !important; position: relative !important; }
+  @media(max-width:768px){ section { padding: 80px 1.5rem 4rem !important; } }
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-  <link rel="icon" type="image/png" href="/logo.svg" />
+  /* NAV */
+  .nav-wrap { position:fixed; top:0; left:0; width:100%; height:64px; z-index:200; backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); background:rgba(2,15,10,0.85); border-bottom:1px solid var(--border); transition:all .3s ease; display:flex; align-items:center; }
+  .nav-inner { width:100%; max-width:1400px; margin:0 auto; padding:0 3rem; display:flex; justify-content:space-between; align-items:center; }
+  .nav-link { position:relative; color:var(--muted); transition:color .3s ease; text-decoration:none; font-weight:500; font-size:.95rem; }
+  .nav-link:hover,.nav-link.active { color:var(--accent); text-shadow: 0 0 12px var(--accent-glow); }
+  .nav-link::after { content:''; position:absolute; bottom:-4px; left:0; width:0; height:2px; background:var(--accent); transition:width .3s ease; border-radius:2px; box-shadow: 0 0 8px var(--accent); }
+  .nav-link:hover::after,.nav-link.active::after { width:100%; }
 
-  <!-- PWA Cache Buster -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) {
-          registration.unregister();
-        }
-      });
-      // Force reload once if arriving from cache
-      if (!sessionStorage.getItem('pwa_busted')) {
-        sessionStorage.setItem('pwa_busted', 'true');
-        setTimeout(() => window.location.reload(true), 500);
+  /* BUTTONS */
+  .btn { font-family:'Outfit',sans-serif; font-weight:600; border:none; cursor:pointer; border-radius:12px; transition:all .3s cubic-bezier(.4,0,.2,1); display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.95rem; }
+  .btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .btn-p { background:linear-gradient(135deg, var(--accent2), #059669); color:#000; padding:12px 28px; box-shadow: 0 4px 15px rgba(16,185,129,0.2); }
+  .btn-p:hover { background:linear-gradient(135deg, var(--accent), var(--accent2)); transform:translateY(-2px); box-shadow:0 8px 30px rgba(52,211,153,.4); }
+  .btn-o { background:rgba(0,200,80,0.05); color:var(--accent); padding:12px 28px; border:1px solid var(--border-light); backdrop-filter:blur(8px); }
+  .btn-o:hover { border-color:var(--accent); background:rgba(0,200,80,0.1); transform:translateY(-2px); box-shadow:0 8px 30px var(--accent-glow); }
+  .btn-sm { padding:8px 20px; font-size:.85rem; border-radius:10px; }
+  .btn-gold { background:linear-gradient(135deg, var(--gold), var(--gold-dim)); color:#000; padding:10px 24px; box-shadow: 0 4px 15px rgba(245,158,11,0.2); }
+  .btn-gold:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(245,158,11,.4); }
+
+  /* CARDS */
+  .card { background:var(--card); border:1px solid var(--border); border-radius:20px; transition:all .4s cubic-bezier(.4,0,.2,1); overflow:hidden; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
+  .card:hover { border-color:var(--border-light); background:var(--card-hover); box-shadow:0 12px 40px rgba(0,0,0,.5), inset 0 0 0 1px rgba(0,200,80,0.1); }
+  .card-lift:hover { transform:translateY(-6px); border-color:var(--accent2); box-shadow:0 20px 50px rgba(0,0,0,.6),0 0 40px var(--accent-glow); }
+  .card-inner { padding:32px; }
+
+  /* TABS */
+  .tab-btn { padding:12px 24px; border-radius:12px; font-size:.9rem; font-weight:600; cursor:pointer; border:1px solid var(--border); background:rgba(255,255,255,0.02); color:var(--muted); transition:all .3s ease; font-family:'Outfit',sans-serif; backdrop-filter:blur(8px); }
+  .tab-btn:hover { color:var(--fg); border-color:var(--border-light); background:rgba(255,255,255,0.05); transform:translateY(-1px); }
+  .tab-btn.active { background:var(--accent2); color:#000; border-color:var(--accent2); box-shadow:0 4px 20px rgba(16,185,129,0.3); }
+
+  /* FORM */
+  .form-input { width:100%; padding:14px 18px; border-radius:12px; font-size:.95rem; background:rgba(0,0,0,0.4); border:1px solid var(--border); color:var(--fg); outline:none; transition:all .3s ease; font-family:'Outfit',sans-serif; backdrop-filter:blur(8px); box-shadow:inset 0 2px 4px rgba(0,0,0,0.2); }
+  .form-input:focus { border-color:var(--accent2); background:rgba(0,0,0,0.6); box-shadow:0 0 0 4px var(--accent-glow), inset 0 2px 4px rgba(0,0,0,0.2); }
+  .form-select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%236ee7b7' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 16px center; padding-right:40px; cursor:pointer; }
+  .form-label { display:block; font-size:.85rem; font-weight:600; color:var(--fg2); margin-bottom:8px; letter-spacing:0.02em; }
+
+  /* RESULT CARD */
+  .result-card { background:linear-gradient(135deg, rgba(52,211,153,.1), rgba(16,185,129,.05)); border:1px solid rgba(52,211,153,.25); border-radius:16px; padding:24px; box-shadow:0 8px 32px rgba(0,0,0,0.2); transition:transform .3s ease; }
+  .result-card:hover { transform:scale(1.02); }
+
+  /* SCROLL REVEAL */
+  .reveal { opacity:0; transform:translateY(40px); transition:all .8s cubic-bezier(.4,0,.2,1); }
+  .reveal.vis { opacity:1; transform:translateY(0); }
+  .rd1{transition-delay:.1s}.rd2{transition-delay:.2s}.rd3{transition-delay:.3s}.rd4{transition-delay:.4s}.rd5{transition-delay:.5s}
+
+  /* DIVIDER */
+  .divider { width:60px; height:4px; border-radius:2px; background:linear-gradient(90deg,var(--accent),var(--gold)); margin-bottom:20px; box-shadow:0 0 10px var(--accent-glow); }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:24px; right:24px; background:rgba(20,30,20,0.9); backdrop-filter:blur(16px); border:1px solid var(--accent2); color:var(--fg); padding:16px 24px; border-radius:12px; font-size:.9rem; font-weight:500; z-index:9999; transform:translateY(100px); opacity:0; transition:all .4s cubic-bezier(.4,0,.2,1); box-shadow:0 10px 40px rgba(0,0,0,.6), 0 0 20px var(--accent-glow); max-width:380px; display:flex; align-items:center; }
+  .toast.show { transform:translateY(0); opacity:1; }
+
+  /* MOBILE */
+  .mob-menu { position:fixed; top:0; right:-320px; width:300px; height:100vh; background:rgba(7,14,8,0.95); backdrop-filter:blur(24px); border-left:1px solid var(--border); z-index:200; transition:right .4s cubic-bezier(.4,0,.2,1); padding:80px 32px 32px; overflow-y:auto; box-shadow:-10px 0 40px rgba(0,0,0,.5); }
+  .mob-menu.open { right:0; }
+  .mob-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); z-index:199; opacity:0; pointer-events:none; transition:opacity .4s ease; }
+  .mob-overlay.open { opacity:1; pointer-events:all; }
+
+  /* PRICE TABLE */
+  .price-up { color:var(--accent); font-weight:600; text-shadow:0 0 8px rgba(52,211,153,.3); }
+  .price-down { color:var(--red); font-weight:600; text-shadow:0 0 8px rgba(239,68,68,.3); }
+
+  /* SCHEME TAG */
+  .tag { display:inline-flex; align-items:center; padding:6px 12px; border-radius:8px; font-size:.75rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; }
+
+  /* PEST CARD IMAGE PLACEHOLDER */
+  .pest-img { width:100%; height:180px; background:linear-gradient(135deg, rgba(20,30,20,0.8), rgba(10,15,10,0.9)); border-radius:16px 16px 0 0; display:flex; align-items:center; justify-content:center; font-size:3.5rem; color:var(--accent2); opacity:.8; transition:transform .5s ease; }
+  .card:hover .pest-img { transform:scale(1.05); color:var(--accent); }
+
+  /* Weather icon animation */
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .float-anim { animation:float 4s ease-in-out infinite; }
+
+  /* Glow */
+  .glow { position:absolute; border-radius:50%; filter:blur(140px); pointer-events:none; mix-blend-mode:screen; }
+
+  /* 3D canvas containers */
+  .canvas-wrap { border-radius:16px; border:1px solid var(--border); overflow:hidden; position:relative; box-shadow:inset 0 0 20px rgba(0,0,0,.5); }
+  .canvas-wrap canvas { width:100%; height:100%; outline:none; }
+
+  /* TABLE */
+  .data-table { width:100%; border-collapse:separate; border-spacing:0; }
+  .data-table th { text-align:left; padding:16px; font-size:.8rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.2); }
+  .data-table td { padding:16px; font-size:.95rem; border-bottom:1px solid var(--border); transition:background .2s; }
+  .data-table tr:hover td { background:rgba(52,211,153,.05); }
+
+  @media(prefers-reduced-motion:reduce){ *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;} .reveal{opacity:1;transform:none;} }
+  @media(max-width:768px){
+    .hero-title{font-size:2.5rem!important; line-height:1.1!important;}
+    .section-title{font-size:2.2rem!important;}
+  }
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+<div class="mob-overlay" id="mobOverlay" onclick="closeMob()"></div>
+<nav class="mob-menu" id="mobMenu">
+  <div class="flex justify-between items-center mb-8">
+    <span class="font-bold text-xl" style="font-family:'Outfit';">Menu</span>
+    <button onclick="closeMob()" class="text-2xl" style="color:var(--muted); background:none; border:none; cursor:pointer;" aria-label="Close Menu"><i class="fas fa-times"></i></button>
+  </div>
+  <a href="#home" class="nav-link block mb-5 text-base" onclick="closeMob()">Home</a>
+  <a href="#crop-rec" class="nav-link block mb-5 text-base" onclick="closeMob()">Crop Advisor</a>
+  <a href="#weather" class="nav-link block mb-5 text-base" onclick="closeMob()">Weather</a>
+  <a href="#mandi" class="nav-link block mb-5 text-base" onclick="closeMob()">Mandi Prices</a>
+  <a href="#soil" class="nav-link block mb-5 text-base" onclick="closeMob()">Soil Analysis</a>
+  <a href="#fertilizer" class="nav-link block mb-5 text-base" onclick="closeMob()">Fertilizer</a>
+  <a href="#pest" class="nav-link block mb-5 text-base" onclick="closeMob()">Pest Guide</a>
+  <a href="#schemes" class="nav-link block mb-5 text-base" onclick="closeMob()">Schemes</a>
+  <a href="#farm3d" class="nav-link block mb-5 text-base" onclick="closeMob()">3D Farm</a>
+</nav>
+
+<!-- NAVIGATION -->
+<header class="nav-wrap" id="mainNav">
+  <div class="nav-inner">
+    <!-- LOGO LEFT -->
+    <a href="#home" class="flex items-center gap-2.5 no-underline shrink-0">
+      <div class="flex items-center justify-center" style="width:32px; height:32px; background:#00c853; border-radius:8px; font-size:16px;">🌿</div>
+      <span class="text-xl font-bold" style="font-family:'Outfit';">KisanMittra</span>
+    </a>
+    
+    <!-- NAV LINKS CENTER -->
+    <div class="flex items-center gap-4 justify-center flex-1 xl:gap-6" style="white-space:nowrap;">
+      <a href="#crop-rec" class="nav-link">Crop Advisor</a>
+      <a href="#weather" class="nav-link">Weather</a>
+      <a href="#mandi" class="nav-link">Mandi Prices</a>
+      <a href="#soil" class="nav-link">Soil</a>
+      <a href="#fertilizer" class="nav-link">Fertilizer</a>
+      <a href="#pest" class="nav-link">Pest Guide</a>
+      <a href="#schemes" class="nav-link">Schemes</a>
+      <a href="#farm3d" class="nav-link">3D Farm</a>
+    </div>
+
+    <!-- BUTTON RIGHT -->
+    <div class="flex shrink-0">
+      <button class="btn btn-p btn-sm" onclick="showToast('Welcome to KisanMittra!')">Get Started</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section id="home" class="relative min-h-screen flex items-center overflow-hidden" style="padding:0 !important; padding-top:140px !important;">
+  <canvas id="heroCanvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+  <div class="glow" style="width:500px;height:500px;background:var(--accent2);top:-150px;right:-100px;opacity:.12;"></div>
+  <div class="glow" style="width:400px;height:400px;background:var(--gold-dim);bottom:-100px;left:-100px;opacity:.08;"></div>
+  
+  <div class="relative z-10 w-full" style="max-width:900px; margin:0 auto; padding:0 3rem;">
+    <div class="hero-badge" style="border: 1px solid rgba(0,200,80,0.3); border-radius: 50px; padding: 6px 16px; font-size: 0.82rem; color: rgba(255,255,255,0.75); background: rgba(0,200,80,0.06); display: inline-flex; width: fit-content; margin-bottom: 1.5rem;">
+      ● Empowering 15 Crore+ Indian Farmers
+    </div>
+    
+    <h1 class="mb-6" style="font-size: clamp(3rem, 5.5vw, 5rem); font-weight: 900; line-height: 1.05; max-width: 900px; white-space: nowrap; padding-top: 1rem;">
+      <span style="color:#ffffff;">Your Complete </span><span style="color:#00c853;">Farming</span><br>
+      <span style="color:#ffab00;">Assistant</span>
+    </h1>
+    
+    <p class="text-lg md:text-xl mb-10" style="color:var(--muted); max-width:580px; line-height:1.75;">
+      Crop recommendations, weather alerts, mandi prices, soil analysis, fertilizer calculator, pest guide, government schemes, and a 3D farm view. All in one place.
+    </p>
+    
+    <div class="flex flex-wrap gap-4 mb-16">
+      <a href="#crop-rec" class="btn" style="background:var(--accent);color:#000;padding:16px 32px;font-size:1.1rem;box-shadow:0 8px 24px rgba(0,200,80,0.3);">🌾 Get Crop Advice</a>
+      <a href="#farm3d" class="btn" style="background:rgba(0,0,0,0.4);color:var(--accent);border:1px solid var(--accent);padding:16px 32px;font-size:1.1rem;backdrop-filter:blur(8px);">🌿 3D Farm View</a>
+    </div>
+    
+    <div style="display: flex; flex-direction: row; gap: 3rem; flex-wrap: wrap;">
+      <div><div style="color:#00c853; font-size: 2.2rem; font-weight: 800;" data-count="150">0</div><div style="font-size: 0.78rem; color: rgba(255,255,255,0.6); text-transform:uppercase;">Crops Covered</div></div>
+      <div><div style="color:#ffab00; font-size: 2.2rem; font-weight: 800;" data-count="850">0</div><div style="font-size: 0.78rem; color: rgba(255,255,255,0.6); text-transform:uppercase;">Mandi Markets</div></div>
+      <div><div style="color:#00c853; font-size: 2.2rem; font-weight: 800;" data-count="47">0</div><div style="font-size: 0.78rem; color: rgba(255,255,255,0.6); text-transform:uppercase;">Schemes Listed</div></div>
+      <div><div style="color:#a78bfa; font-size: 2.2rem; font-weight: 800;" data-count="1200">0</div><div style="font-size: 0.78rem; color: rgba(255,255,255,0.6); text-transform:uppercase;">Pest Solutions</div></div>
+    </div>
+  </div>
+
+  <div style="position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 10;">
+    <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.6); text-align: center;">SCROLL</span>
+    <div style="width: 22px; height: 34px; border-radius: 11px; border: 2px solid rgba(255,255,255,0.3); display: flex; justify-content: center; padding-top: 6px;">
+      <div class="animate-bounce" style="width: 4px; height: 4px; border-radius: 50%; background: #ffffff;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CROP RECOMMENDATION ENGINE -->
+<section id="crop-rec" class="py-20 relative">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center mb-12 reveal">
+      <div class="divider mx-auto"></div>
+      <h2 class="section-title text-4xl md:text-5xl font-bold mb-3">Crop Recommendation</h2>
+      <p class="text-base max-w-xl mx-auto" style="color:var(--muted);">Select your soil type, season, and region to get personalized crop suggestions with expected yield and profitability.</p>
+    </div>
+    <div class="grid lg:grid-cols-2 gap-8">
+      <!-- Input Form -->
+      <div class="card card-inner reveal">
+        <h3 class="text-xl font-bold mb-5"><i class="fas fa-sliders-h mr-2" style="color:var(--accent);"></i>Farm Parameters</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="form-label">Soil Type</label>
+            <select id="soilType" class="form-input form-select">
+              <option value="">-- Select Soil Type --</option>
+              <option value="alluvial">Alluvial Soil</option>
+              <option value="black">Black Soil (Regur)</option>
+              <option value="red">Red Soil</option>
+              <option value="laterite">Laterite Soil</option>
+              <option value="sandy">Sandy Soil</option>
+              <option value="clay">Clay Soil</option>
+              <option value="loam">Loam Soil</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Season</label>
+            <select id="season" class="form-input form-select">
+              <option value="">-- Select Season --</option>
+              <option value="kharif">Kharif (June–October)</option>
+              <option value="rabi">Rabi (October–March)</option>
+              <option value="zaid">Zaid (March–June)</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Rainfall Region</label>
+            <select id="rainfall" class="form-input form-select">
+              <option value="">-- Select Rainfall --</option>
+              <option value="high">High (>200 cm/year)</option>
+              <option value="medium">Medium (100–200 cm/year)</option>
+              <option value="low">Low (50–100 cm/year)</option>
+              <option value="very-low">Very Low (<50 cm/year)</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">State / Region</label>
+            <select id="state" class="form-input form-select">
+              <option value="">-- Select State --</option>
+              <option value="MH">Maharashtra</option>
+              <option value="UP">Uttar Pradesh</option>
+              <option value="PB">Punjab</option>
+              <option value="HR">Haryana</option>
+              <option value="RJ">Rajasthan</option>
+              <option value="MP">Madhya Pradesh</option>
+              <option value="KA">Karnataka</option>
+              <option value="TN">Tamil Nadu</option>
+              <option value="AP">Andhra Pradesh</option>
+              <option value="WB">West Bengal</option>
+              <option value="GJ">Gujarat</option>
+              <option value="BH">Bihar</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Irrigation Available?</label>
+            <select id="irrigation" class="form-input form-select">
+              <option value="yes">Yes — Canal / Borewell / Drip</option>
+              <option value="partial">Partial — Rainfed + Limited</option>
+              <option value="no">No — Fully Rainfed</option>
+            </select>
+          </div>
+          <button class="btn btn-p w-full mt-2" onclick="getCropRecommendation()"><i class="fas fa-search"></i>Get Recommendations</button>
+        </div>
+      </div>
+      <!-- Results -->
+      <div class="reveal rd2">
+        <div id="cropResults" class="space-y-4">
+          <div class="card card-inner flex flex-col items-center justify-center" style="min-height:400px;color:var(--muted);">
+            <i class="fas fa-seedling text-5xl mb-4" style="opacity:.3;"></i>
+            <p class="text-base">Fill in your farm parameters and click recommend to see suggested crops with yield estimates and profit analysis.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WEATHER DASHBOARD -->
+<section id="weather" class="py-20 relative" style="background:var(--bg2);">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center mb-12 reveal">
+      <div class="divider mx-auto"></div>
+      <h2 class="section-title text-4xl md:text-5xl font-bold mb-3">Weather Dashboard</h2>
+      <p class="text-base max-w-xl mx-auto" style="color:var(--muted);">7-day forecast with farming advisories, humidity, wind, and rainfall predictions for your district.</p>
+    </div>
+    <!-- Current Weather -->
+    <div class="grid md:grid-cols-4 gap-4 mb-8 reveal">
+      <div class="card card-inner md:col-span-1 flex flex-col items-center justify-center">
+        <div class="text-5xl mb-3 float-anim" style="color:var(--gold);"><i class="fas fa-cloud-sun"></i></div>
+        <div class="text-4xl font-black">32 C</div>
+        <div class="text-sm" style="color:var(--muted);">Partly Cloudy</div>
+        <div class="text-xs mt-1" style="color:var(--accent);">Pune, Maharashtra</div>
+      </div>
+      <div class="card card-inner flex flex-col justify-between">
+        <div><div class="text-xs" style="color:var(--muted);">Humidity</div><div class="text-2xl font-bold mt-1">68%</div></div>
+        <div><div class="text-xs" style="color:var(--muted);">Wind Speed</div><div class="text-2xl font-bold mt-1">14 km/h</div></div>
+        <div><div class="text-xs" style="color:var(--muted);">Feels Like</div><div class="text-2xl font-bold mt-1">35 C</div></div>
+      </div>
+      <div class="card card-inner flex flex-col justify-between">
+        <div><div class="text-xs" style="color:var(--muted);">UV Index</div><div class="text-2xl font-bold mt-1" style="color:var(--gold);">7 High</div></div>
+        <div><div class="text-xs" style="color:var(--muted);">Visibility</div><div class="text-2xl font-bold mt-1">8 km</div></div>
+        <div><div class="text-xs" style="color:var(--muted);">Pressure</div><div class="text-2xl font-bold mt-1">1012 hPa</div></div>
+      </div>
+      <div class="card card-inner flex flex-col justify-between">
+        <div><div class="text-xs" style="color:var(--muted);">Sunrise</div><div class="text-lg font-bold mt-1"><i class="fas fa-sun mr-1" style="color:var(--gold);"></i>6:12 AM</div></div>
+        <div><div class="text-xs" style="color:var(--muted);">Sunset</div><div class="text-lg font-bold mt-1"><i class="fas fa-moon mr-1" style="color:var(--blue);"></i>6:48 PM</div></div>
+        <div><div class="text-xs" style="color:var(--muted);">Rain Chance</div><div class="text-2xl font-bold mt-1" style="color:var(--blue);">35%</div></div>
+      </div>
+    </div>
+    <!-- 7 Day Forecast -->
+    <div class="card reveal" style="overflow:hidden;">
+      <div class="px-5 py-3 font-bold" style="border-bottom:1px solid var(--border);">7-Day Forecast</div>
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead><tr><th>Day</th><th>Condition</th><th>Max</th><th>Min</th><th>Rain</th><th>Humidity</th><th>Wind</th><th>Advisory</th></tr></thead>
+          <tbody id="forecastTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MANDI PRICES -->
+<section id="mandi" class="py-20 relative">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center mb-12 reveal">
+      <div class="divider mx-auto"></div>
+      <h2 class="section-title text-4xl md:text-5xl font-bold mb-3">Mandi Market Prices</h2>
+      <p class="text-base max-w-xl mx-auto" style="color:var(--muted);">Live commodity prices from major mandis across India. Updated every hour.</p>
+    </div>
+    <div class="flex flex-wrap gap-2 mb-6 reveal">
+      <button class="tab-btn active" onclick="filterMandi('all',this)">All Crops</button>
+      <button class="tab-btn" onclick="filterMandi('grain',this)">Grains</button>
+      <button class="tab-btn" onclick="filterMandi('vegetable',this)">Vegetables</button>
+      <button class="tab-btn" onclick="filterMandi('pulse',this)">Pulses</button>
+      <button class="tab-btn" onclick="filterMandi('oilseed',this)">Oilseeds</button>
+      <button class="tab-btn" onclick="filterMandi('spice',this)">Spices</button>
+    </div>
+    <div class="card reveal" style="overflow:hidden;">
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead><tr><th>Commodity</th><th>Mandi</th><th>State</th><th>Min Price</th><th>Max Price</th><th>Modal Price</th><th>Trend</th></tr></thead>
+          <tbody id="mandiTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOIL ANALYSIS -->
+<section id="soil" class="py-20 relative" style="background:var(--bg2);">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center mb-12 reveal">
+      <div class="divider mx-auto"></div>
+      <h2 class="section-title text-4xl md:text-5xl font-bold mb-3">Soil Health Analysis</h2>
+      <p class="text-base max-w-xl mx-auto" style="color:var(--muted);">Enter your soil test values to get fertility rating, nutrient recommendations, and suitability analysis.</p>
+    </div>
+    <div class="grid lg:grid-cols-2 gap-8">
+      <div class="card card-inner reveal">
+        <h3 class="text-xl font-bold mb-5"><i class="fas fa-vial mr-2" style="color:var(--accent);"></i>Soil Test Inputs</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="form-label">pH Level</label><input type="number" id="soilPH" class="form-input" placeholder="e.g. 6.5" step="0.1" min="0" max="14"></div>
+          <div><label class="form-label">Nitrogen (kg/ha)</label><input type="number" id="soilN" class="form-input" placeholder="e.g. 240" min="0"></div>
+          <div><label class="form-label">Phosphorus (kg/ha)</label><input type="number" id="soilP" class="form-input" placeholder="e.g. 18" min="0"></div>
+          <div><label class="form-label">Potassium (kg/ha)</label><input type="number" id="soilK" class="form-input" placeholder="e.g. 280" min="0"></div>
+          <div><label class="form-label">Organic Carbon (%)</label><input type="number" id="soilOC" class="form-input" placeholder="e.g. 0.65" step="0.01" min="0"></div>
+          <div><label class="form-label">EC (dS/m)</label><input type="number" id="soilEC" class="form-input" placeholder="e.g. 0.4" step="0.01" min="0"></div>
+          <div><label class="form-label">Sulphur (ppm)</label><input type="number" id="soilS" class="form-input" placeholder="e.g. 12" min="0"></div>
+          <div><label class="form-label">Zinc (ppm)</label><input type="number" id="soilZn" class="form-input" placeholder="e.g. 1.2" step="0.1" min="0"></div>
+        </div>
+        <button class="btn btn-p w-full mt-5" onclick="analyzeSoil()"><i class="fas fa-microscope"></i>Analyze Soil Health</button>
+      </div>
+      <div class="reveal rd2" id="soilResults">
+        <div class="card card-inner flex flex-col items-center justify-center" style="min-height:400px;color:var(--muted);">
+          <i class="fas fa-vial text-5xl mb-4" style="opacity:.3;"></i>
+          <p class="text-base">Enter soil test values and click analyze to see health ratings, deficiencies, and corrective measures.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FERTILIZER CALCULATOR -->
+<section id="fertilizer" class="py-20 relative">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center mb-12 reveal">
+      <div class="divider mx-auto"></div>
+      <h2 class="section-title text-4xl md:text-5xl font-bold mb-3">Fertilizer Calculator</h2>
+      <p class="text-base max-w-xl mx-auto" style="color:var(--muted);">Calculate exact fertilizer quantities based on your crop, area, and soil nutrient status. Reduce waste, maximize yield.</p>
+    </div>
+    <div class="grid lg:grid-cols-3 gap-6 reveal">
+      <div class="card card-inner">
+        <h3 class="text-lg font-bold mb-4"><i class="fas fa-calculator mr-2" style="color:var(--gold);"></i>Input Details</h3>
+        <div class="space-y-3">
+          <div><label class="form-label">Crop</label><select id="fertCrop" class="form-input form-select"><option value="">-- Select Crop --</option><option value="rice">Rice</option><option value="wheat">Wheat</option><option value="cotton">Cotton</option><option value="sugarcane">Sugarcane</option><option value="soybean">Soybean</option><option value="maize">Maize</option><option value="groundnut">Groundnut</option><option value="mustard">Mustard</option></select></div>
+          <div><label class="form-label">Area (acres)</label><input type="number" id="fertArea" class="form-input" placeholder="e.g. 5" min="0.1" step="0.1"></div>
+          <div><label class="form-label">Target Yield (qtl/ha)</label><input type="number" id="fertYield" class="form-input" placeholder="e.g. 50" min="0"></div>
+          <div><label class="form-label">Soil N Status</label><select id="fertN" class="form-input form-select"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+          <div><label class="form-label">Soil P Status</label><select id="fertP" class="form-input form-select"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+          <div><label class="form-label">Soil K Status</label><select id="fertK" class="form-input form-select"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+          <button class="btn btn-gold w-full" onclick="calcFertilizer()"><i class="fas fa-flask"></i>Calculate</button>
+        </div>
+      </div>
+      <div class="lg:col-span-2" id="fertResults">
+        <div class="card card-inner flex flex-col items-center justify-center" style="min-height:400px;color:var(--muted);">
+          <i class="fas fa-flask text-5xl mb-4" style="opacity:.3;"></i>
+          <p class="text-base">Select crop, area, and soil status to get precise fertilizer recommendations with cost estimates.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PEST & DISEASE GUIDE -->
+<section id="pest" class="py-20 relative" style="background:var(--bg2);">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center mb-12 reveal">
+      <div class="divider mx-auto"></div>
+      <h2 class="section-title text-4xl md:text-5xl font-bold mb-3">Pest & Disease Guide</h2>
+      <p class="text-base max-w-xl mx-auto" style="color:var(--muted);">Identify common pests and diseases, understand symptoms, and get treatment recommendations.</p>
+    </div>
+    <div class="flex flex-wrap gap-2 mb-6 reveal">
+      <button class="tab-btn active" onclick="filterPest('all',this)">All</button>
+      <button class="tab-btn" onclick="filterPest('insect',this)">Insects</button>
+      <button class="tab-btn" onclick="filterPest('fungus',this)">Fungal</button>
+      <button class="tab-btn" onclick="filterPest('virus',this)">Viral</button>
+      <button class="tab-btn" onclick="filterPest('bacterial',this)">Bacterial</button>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 reveal" id="pestGrid"></div>
+  </div>
+</section>
+
+<!-- GOVERNMENT SCHEMES -->
+<section id="schemes" class="py-20 relative">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center mb-12 reveal">
+      <div class="divider mx-auto"></div>
+      <h2 class="section-title text-4xl md:text-5xl font-bold mb-3">Government Schemes</h2>
+      <p class="text-base max-w-xl mx-auto" style="color:var(--muted);">Central and state government schemes for farmers — subsidies, insurance, loans, and infrastructure support.</p>
+    </div>
+    <div class="flex flex-wrap gap-2 mb-6 reveal">
+      <button class="tab-btn active" onclick="filterSchemes('all',this)">All Schemes</button>
+      <button class="tab-btn" onclick="filterSchemes('central',this)">Central</button>
+      <button class="tab-btn" onclick="filterSchemes('insurance',this)">Insurance</button>
+      <button class="tab-btn" onclick="filterSchemes('loan',this)">Credit/Loan</button>
+      <button class="tab-btn" onclick="filterSchemes('infra',this)">Infrastructure</button>
+    </div>
+    <div class="grid md:grid-cols-2 gap-5 reveal" id="schemesGrid"></div>
+  </div>
+</section>
+
+<!-- 3D FARM VIEW -->
+<section id="farm3d" class="py-20 relative" style="background:var(--bg2);">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center mb-12 reveal">
+      <div class="divider mx-auto"></div>
+      <h2 class="section-title text-4xl md:text-5xl font-bold mb-3">3D Farm Visualization</h2>
+      <p class="text-base max-w-xl mx-auto" style="color:var(--muted);">Interactive 3D model of a typical Indian farm with crop plots, irrigation channels, farmhouse, and equipment.</p>
+    </div>
+    <div class="reveal">
+      <div class="canvas-wrap" style="height:550px;" id="farm3dWrap">
+        <canvas id="farm3dCanvas"></canvas>
+      </div>
+      <div class="flex flex-wrap gap-3 mt-4 justify-center">
+        <button class="btn btn-o btn-sm" onclick="resetFarmView()"><i class="fas fa-undo"></i>Reset View</button>
+        <button class="btn btn-o btn-sm" onclick="toggleFarmLabels()"><i class="fas fa-tags"></i>Toggle Labels</button>
+        <button class="btn btn-o btn-sm" onclick="toggleFarmSeason()"><i class="fas fa-sun"></i>Change Season</button>
+      </div>
+      <p class="text-center text-xs mt-2" style="color:var(--muted);"><i class="fas fa-mouse-pointer mr-1"></i>Drag to rotate, scroll to zoom, right-click to pan</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="py-10" style="border-top:1px solid var(--border);">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="grid md:grid-cols-4 gap-8 mb-8">
+      <div>
+        <div class="flex items-center gap-2.5 mb-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,var(--accent2),var(--gold));"><i class="fas fa-leaf text-black text-xs"></i></div>
+          <span class="font-bold" style="font-family:'Outfit';">KisanMittra</span>
+        </div>
+        <p class="text-sm" style="color:var(--muted);">A comprehensive digital platform for Indian farmers. Making agriculture smarter, more profitable, and sustainable.</p>
+      </div>
+      <div><h4 class="font-bold text-sm mb-3" style="color:var(--muted);">Tools</h4><ul class="space-y-2 text-sm" style="color:var(--muted);"><li><a href="#crop-rec" class="hover:text-white transition-colors">Crop Advisor</a></li><li><a href="#soil" class="hover:text-white transition-colors">Soil Analysis</a></li><li><a href="#fertilizer" class="hover:text-white transition-colors">Fertilizer Calc</a></li><li><a href="#pest" class="hover:text-white transition-colors">Pest Guide</a></li></ul></div>
+      <div><h4 class="font-bold text-sm mb-3" style="color:var(--muted);">Information</h4><ul class="space-y-2 text-sm" style="color:var(--muted);"><li><a href="#weather" class="hover:text-white transition-colors">Weather</a></li><li><a href="#mandi" class="hover:text-white transition-colors">Mandi Prices</a></li><li><a href="#schemes" class="hover:text-white transition-colors">Govt Schemes</a></li><li><a href="#farm3d" class="hover:text-white transition-colors">3D Farm</a></li></ul></div>
+      <div><h4 class="font-bold text-sm mb-3" style="color:var(--muted);">Connect</h4><div class="flex gap-2"><a href="#" onclick="showToast('Follow us on Twitter');return false;" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-110" style="background:var(--card);border:1px solid var(--border);color:var(--muted);" aria-label="Twitter"><i class="fab fa-twitter"></i></a><a href="#" onclick="showToast('Visit our GitHub');return false;" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-110" style="background:var(--card);border:1px solid var(--border);color:var(--muted);" aria-label="GitHub"><i class="fab fa-github"></i></a><a href="#" onclick="showToast('Join our WhatsApp group');return false;" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-110" style="background:var(--card);border:1px solid var(--border);color:var(--muted);" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a></div></div>
+    </div>
+    <div class="pt-6 flex flex-wrap justify-between items-center text-xs" style="border-top:1px solid var(--border);color:var(--muted);">
+      <span>2025 KisanMittra. Built for Indian Farmers.</span>
+      <span>Data is for demonstration purposes.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- THREE.JS 3D SCENES -->
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ===== HERO PARTICLES =====
+(function(){
+  const c = document.getElementById('heroCanvas');
+  const r = new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true});
+  r.setSize(window.innerWidth,window.innerHeight);
+  r.setPixelRatio(Math.min(devicePixelRatio,2));
+  const s = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,1000);
+  cam.position.set(0,5,20);
+  const N=1500, pos=new Float32Array(N*3), col=new Float32Array(N*3), sz=new Float32Array(N);
+  const c1=new THREE.Color('#00ff64'),c2=new THREE.Color('#ff8c00');
+  for(let i=0;i<N;i++){
+    pos[i*3]=(Math.random()-.5)*60;pos[i*3+1]=(Math.random()-.5)*40;pos[i*3+2]=(Math.random()-.5)*40;
+    const cc=Math.random()<.6?c1:c2;
+    col[i*3]=cc.r;col[i*3+1]=cc.g;col[i*3+2]=cc.b; 
+    sz[i]=Math.random()*3.0+1.0;
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  g.setAttribute('aColor',new THREE.BufferAttribute(col,3));
+  g.setAttribute('aSize',new THREE.BufferAttribute(sz,1));
+  const m=new THREE.ShaderMaterial({
+    uniforms:{uTime:{value:0},uPR:{value:Math.min(devicePixelRatio,2)}},
+    vertexShader:`attribute vec3 aColor;attribute float aSize;uniform float uTime;uniform float uPR;varying vec3 vC;varying float vA;
+    void main(){vC=aColor;vec3 p=position;p.y+=sin(uTime*.3+position.x*.1)*1.5;p.x+=cos(uTime*.2+position.z*.1)*1.0;
+    vec4 mv=modelViewMatrix*vec4(p,1.);gl_PointSize=max(aSize*uPR*(80./-mv.z),1.);gl_Position=projectionMatrix*mv;vA=smoothstep(60.,10.,-mv.z);}`,
+    fragmentShader:`varying vec3 vC;varying float vA;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;
+    gl_FragColor=vec4(vC,smoothstep(.5,.1,d)*vA*.5);}`,
+    transparent:true,depthWrite:false,blending:THREE.AdditiveBlending
+  });
+  const pts=new THREE.Points(g,m);s.add(pts);
+  const shapes=[];
+  const sgeos=[new THREE.IcosahedronGeometry(.7,0),new THREE.OctahedronGeometry(.5,0),new THREE.TetrahedronGeometry(.6,0)];
+  const smat=new THREE.MeshStandardMaterial({color:'#00c853',wireframe:true,transparent:true,opacity:.15});
+  for(let i=0;i<6;i++){const sh=new THREE.Mesh(sgeos[i%3],smat.clone());sh.position.set((Math.random()-.5)*30,(Math.random()-.5)*20,(Math.random()-.5)*15-5);
+  sh.rotation.set(Math.random()*3.14,Math.random()*3.14,0);sh.userData={rx:(Math.random()-.5)*.01,ry:(Math.random()-.5)*.01,fo:Math.random()*6.28};s.add(sh);shapes.push(sh);}
+  s.add(new THREE.AmbientLight('#34d399',.3));const dl=new THREE.DirectionalLight('#ffffff',.5);dl.position.set(5,10,5);s.add(dl);
+  let mx=0,my=0;
+  addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2;});
+  (function a(){requestAnimationFrame(a);const t=performance.now()*.001;m.uniforms.uTime.value=t;pts.rotation.y=t*.02+mx*.1;pts.rotation.x=my*.05;
+  shapes.forEach(sh=>{sh.rotation.x+=sh.userData.rx;sh.rotation.y+=sh.userData.ry;sh.position.y+=Math.sin(t*.5+sh.userData.fo)*.004;});
+  cam.position.x+=(mx*2-cam.position.x)*.02;cam.position.y+=(-my*1.5+5-cam.position.y)*.02;cam.lookAt(0,0,0);r.render(s,cam);})();
+  addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();r.setSize(innerWidth,innerHeight);m.uniforms.uPR.value=Math.min(devicePixelRatio,2);});
+})();
+
+// ===== 3D FARM =====
+let farmControls, farmScene, farmCamera, farmRenderer, farmGroup;
+let showLabels = true;
+let seasonMode = 0; // 0=kharif green, 1=rabi golden, 2=zaid dry
+const seasonColors = [
+  { ground:'#2a3a10', crop:'#2d8a1e', name:'Kharif' },
+  { ground:'#3a3510', crop:'#c4a035', name:'Rabi' },
+  { ground:'#3a2a10', crop:'#8a7a3a', name:'Zaid' }
+];
+
+(function createFarm(){
+  const wrap = document.getElementById('farm3dWrap');
+  const canvas = document.getElementById('farm3dCanvas');
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  farmRenderer = new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  farmRenderer.setSize(w,h);
+  farmRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  farmRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+  farmRenderer.shadowMap.enabled = true;
+
+  farmScene = new THREE.Scene();
+  farmScene.fog = new THREE.FogExp2('#080c08', 0.012);
+  farmScene.background = new THREE.Color('#080c08');
+
+  farmCamera = new THREE.PerspectiveCamera(50, w/h, 0.1, 500);
+  farmCamera.position.set(25, 20, 30);
+
+  farmControls = new OrbitControls(farmCamera, canvas);
+  farmControls.enableDamping = true;
+  farmControls.dampingFactor = 0.05;
+  farmControls.maxPolarAngle = Math.PI/2.15;
+  farmControls.minDistance = 10;
+  farmControls.maxDistance = 60;
+  farmControls.target.set(0, 0, 0);
+
+  farmGroup = new THREE.Group();
+  farmScene.add(farmGroup);
+
+  // Ground
+  const groundGeo = new THREE.PlaneGeometry(60, 60);
+  groundGeo.rotateX(-Math.PI/2);
+  const groundMat = new THREE.MeshLambertMaterial({color: seasonColors[0].ground});
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.receiveShadow = true;
+  ground.name = 'ground';
+  farmGroup.add(ground);
+
+  // Boundary fence
+  const fenceMat = new THREE.MeshLambertMaterial({color:'#5c4a2a'});
+  for(let i=-28;i<=28;i+=4){
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,1.5,6), fenceMat);
+    post.position.set(i,.75,-28); farmGroup.add(post);
+    post.clone().position.set(i,.75,28); farmGroup.add(post.clone());
+    post.clone().position.set(-28,.75,i); farmGroup.add(post.clone());
+    post.clone().position.set(28,.75,i); farmGroup.add(post.clone());
+  }
+  // Fence rails
+  const railGeo = new THREE.BoxGeometry(56,.05,.05);
+  for(let y of [.4, 1.0]){
+    const r1 = new THREE.Mesh(railGeo, fenceMat); r1.position.set(0,y,-28); farmGroup.add(r1);
+    const r2 = r1.clone(); r2.position.set(0,y,28); farmGroup.add(r2);
+    const r3 = new THREE.Mesh(new THREE.BoxGeometry(.05,.05,56), fenceMat); r3.position.set(-28,y,0); farmGroup.add(r3);
+    const r4 = r3.clone(); r4.position.set(28,y,0); farmGroup.add(r4);
+  }
+
+  // Crop plots (6 plots)
+  const plotData = [
+    { x:-18, z:-15, w:14, h:12, label:'Rice Paddy', icon:'fa-seedling' },
+    { x:4, z:-15, w:14, h:12, label:'Wheat Field', icon:'fa-wheat-awn' },
+    { x:-18, z:4, w:14, h:12, label:'Sugarcane', icon:'fa-leaf' },
+    { x:4, z:4, w:14, h:12, label:'Cotton Plot', icon:'fa-cloud' },
+    { x:-18, z:20, w:10, h:8, label:'Vegetable Garden', icon:'fa-carrot' },
+    { x:8, z:20, w:10, h:8, label:'Flower Beds', icon:'fa-spa' },
+  ];
+
+  const cropMeshes = [];
+  plotData.forEach(pd => {
+    // Plot boundary (raised bed)
+    const bedGeo = new THREE.BoxGeometry(pd.w+.4, .2, pd.h+.4);
+    const bedMat = new THREE.MeshLambertMaterial({color:'#3d2b10'});
+    const bed = new THREE.Mesh(bedGeo, bedMat);
+    bed.position.set(pd.x, .1, pd.z);
+    bed.receiveShadow = true;
+    farmGroup.add(bed);
+
+    // Crop rows
+    const rows = Math.floor(pd.h / 1.2);
+    const cols = Math.floor(pd.w / 0.8);
+    const cropMat = new THREE.MeshLambertMaterial({color: seasonColors[0].crop});
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const cx = pd.x - pd.w/2 + .5 + c*(pd.w/cols);
+        const cz = pd.z - pd.h/2 + .5 + r*(pd.h/rows);
+        const height = .4 + Math.random()*.6;
+        const crop = new THREE.Mesh(new THREE.ConeGeometry(.15, height, 5), cropMat.clone());
+        crop.position.set(cx, height/2 + .2, cz);
+        crop.castShadow = true;
+        crop.name = 'crop';
+        farmGroup.add(crop);
+        cropMeshes.push(crop);
       }
     }
-  </script>
+  });
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="AgroVoice - AI Assistant for Farmers" />
-  <meta property="og:description"
-    content="Voice-first AI assistant helping farmers with agricultural advice in their local language" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="/logo.svg" />
+  // Irrigation canal
+  const canalGeo = new THREE.BoxGeometry(50, .6, 1.5);
+  const canalMat = new THREE.MeshLambertMaterial({color:'#1a4a7a'});
+  const canal = new THREE.Mesh(canalGeo, canalMat);
+  canal.position.set(0, -.1, -24);
+  farmGroup.add(canal);
+  // Water surface
+  const waterGeo = new THREE.PlaneGeometry(48, 1.2);
+  waterGeo.rotateX(-Math.PI/2);
+  const waterMat = new THREE.MeshPhysicalMaterial({color:'#0ea5e9',transparent:true,opacity:.5,roughness:.1});
+  const water = new THREE.Mesh(waterGeo, waterMat);
+  water.position.set(0, .18, -24);
+  water.name = 'water';
+  farmGroup.add(water);
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="AgroVoice - AI Assistant for Farmers" />
-  <meta name="twitter:description"
-    content="Voice-first AI assistant helping farmers with agricultural advice in their local language" />
-  <meta name="twitter:image" content="/logo.svg" />
+  // Farmhouse
+  const houseGroup = new THREE.Group();
+  // Walls
+  const wallMat = new THREE.MeshLambertMaterial({color:'#d4a574'});
+  const walls = new THREE.Mesh(new THREE.BoxGeometry(5, 3, 4), wallMat);
+  walls.position.y = 1.5; walls.castShadow = true;
+  houseGroup.add(walls);
+  // Roof
+  const roofGeo = new THREE.ConeGeometry(4, 2, 4);
+  const roofMat = new THREE.MeshLambertMaterial({color:'#8b4513'});
+  const roof = new THREE.Mesh(roofGeo, roofMat);
+  roof.position.y = 4; roof.rotation.y = Math.PI/4; roof.castShadow = true;
+  houseGroup.add(roof);
+  // Door
+  const door = new THREE.Mesh(new THREE.PlaneGeometry(1, 2), new THREE.MeshLambertMaterial({color:'#4a3520'}));
+  door.position.set(0, 1, 2.01);
+  houseGroup.add(door);
+  // Window
+  const win = new THREE.Mesh(new THREE.PlaneGeometry(.8, .8), new THREE.MeshLambertMaterial({color:'#87ceeb',transparent:true,opacity:.6}));
+  win.position.set(1.5, 2, 2.01);
+  houseGroup.add(win);
 
-  <!-- PWA -->
+  houseGroup.position.set(22, 0, 20);
+  farmGroup.add(houseGroup);
 
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="AgroVoice" />
-</head>
+  // Tractor
+  const tractorGroup = new THREE.Group();
+  const bodyMat = new THREE.MeshLambertMaterial({color:'#d32f2f'});
+  const tractorBody = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1, 1.8), bodyMat);
+  tractorBody.position.y = .8; tractorBody.castShadow = true;
+  tractorGroup.add(tractorBody);
+  // Cabin
+  const cabinMat = new THREE.MeshLambertMaterial({color:'#1a1a1a',transparent:true,opacity:.7});
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1, 1.6), cabinMat);
+  cabin.position.set(-.3, 1.8, 0);
+  tractorGroup.add(cabin);
+  // Wheels
+  const wheelMat = new THREE.MeshLambertMaterial({color:'#1a1a1a'});
+  const wheelGeo = new THREE.CylinderGeometry(.5, .5, .3, 12);
+  [-.9, .9].forEach(z => {
+    const w = new THREE.Mesh(wheelGeo, wheelMat);
+    w.rotation.x = Math.PI/2;
+    w.position.set(.8, .5, z);
+    tractorGroup.add(w);
+  });
+  const fwGeo = new THREE.CylinderGeometry(.3, .3, .2, 12);
+  [-.8, .8].forEach(z => {
+    const w = new THREE.Mesh(fwGeo, wheelMat);
+    w.rotation.x = Math.PI/2;
+    w.position.set(-.8, .3, z);
+    tractorGroup.add(w);
+  });
+  tractorGroup.position.set(20, 0, 5);
+  tractorGroup.rotation.y = -.5;
+  farmGroup.add(tractorGroup);
 
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
+  // Tubewell
+  const twGroup = new THREE.Group();
+  const twBase = new THREE.Mesh(new THREE.CylinderGeometry(.8,.8,.3,12), new THREE.MeshLambertMaterial({color:'#666'}));
+  twBase.position.y = .15;
+  twGroup.add(twBase);
+  const twPipe = new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,2,8), new THREE.MeshLambertMaterial({color:'#888'}));
+  twPipe.position.y = 1.15;
+  twGroup.add(twPipe);
+  twGroup.position.set(-25, 0, -24);
+  farmGroup.add(twGroup);
+
+  // Trees along boundaries
+  function addTree(x, z) {
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.1,.15,.8,6), new THREE.MeshLambertMaterial({color:'#5c3a1e'}));
+    trunk.position.set(x, .4, z);
+    farmGroup.add(trunk);
+    const h = 1.5 + Math.random();
+    const leaves = new THREE.Mesh(new THREE.SphereGeometry(.8, 8, 8), new THREE.MeshLambertMaterial({color:'#1a6a1a'}));
+    leaves.position.set(x, .8 + h/2, z);
+    leaves.scale.y = 1.3;
+    leaves.castShadow = true;
+    farmGroup.add(leaves);
+  }
+  for(let i=-24;i<=24;i+=6){addTree(-27,i);addTree(27,i);addTree(i,-27);addTree(i,27);}
+
+  // Windmill / water pump
+  const wmGroup = new THREE.Group();
+  const wmTower = new THREE.Mesh(new THREE.CylinderGeometry(.15,.25,6,8), new THREE.MeshLambertMaterial({color:'#888'}));
+  wmTower.position.y = 3;
+  wmGroup.add(wmTower);
+  const wmBlade = new THREE.Group();
+  for(let i=0;i<3;i++){
+    const blade = new THREE.Mesh(new THREE.BoxGeometry(.2,3,.05), new THREE.MeshLambertMaterial({color:'#ddd'}));
+    blade.position.y = 1.5;
+    const pivot = new THREE.Group();
+    pivot.add(blade);
+    pivot.rotation.z = (i/3)*Math.PI*2;
+    wmBlade.add(pivot);
+  }
+  wmBlade.position.y = 6;
+  wmGroup.add(wmBlade);
+  wmGroup.position.set(-22, 0, -24);
+  farmGroup.add(wmGroup);
+
+  // Lighting
+  farmScene.add(new THREE.AmbientLight('#b0d0b0', .5));
+  const sun = new THREE.DirectionalLight('#fff5e0', 1.2);
+  sun.position.set(15, 20, 10);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024,1024);
+  sun.shadow.camera.near = 1;
+  sun.shadow.camera.far = 60;
+  sun.shadow.camera.left = -30;
+  sun.shadow.camera.right = 30;
+  sun.shadow.camera.top = 30;
+  sun.shadow.camera.bottom = -30;
+  farmScene.add(sun);
+  farmScene.add(new THREE.DirectionalLight('#34d399', .2).translateX(-10).translateY(5));
+
+  // Animation
+  (function anim(){
+    requestAnimationFrame(anim);
+    farmControls.update();
+    const t = performance.now()*.001;
+    // Windmill rotation
+    wmBlade.rotation.z = t * 1.5;
+    // Water animation
+    if(water.visible) water.position.y = .18 + Math.sin(t*.8)*.03;
+    // Crop sway
+    cropMeshes.forEach((cm,i) => {
+      cm.rotation.z = Math.sin(t*1.2 + i*.1) * .02;
+    });
+    farmRenderer.render(farmScene, farmCamera);
+  })();
+
+  // Resize
+  new ResizeObserver(() => {
+    const w = wrap.clientWidth, h = wrap.clientHeight;
+    if(!w||!h) return;
+    farmCamera.aspect = w/h;
+    farmCamera.updateProjectionMatrix();
+    farmRenderer.setSize(w,h);
+  }).observe(wrap);
+})();
+
+window.resetFarmView = function(){
+  farmControls.reset();
+  farmCamera.position.set(25,20,30);
+  farmControls.target.set(0,0,0);
+  showToast('Farm view reset');
+};
+window.toggleFarmLabels = function(){
+  showLabels = !showLabels;
+  showToast(showLabels ? 'Labels visible' : 'Labels hidden');
+};
+window.toggleFarmSeason = function(){
+  seasonMode = (seasonMode + 1) % 3;
+  const sc = seasonColors[seasonMode];
+  farmGroup.children.forEach(ch => {
+    if(ch.name === 'ground') ch.material.color.set(sc.ground);
+    if(ch.name === 'crop') ch.material.color.set(sc.crop);
+  });
+  showToast('Season changed to ' + sc.name);
+};
+</script>
+
+<!-- UI LOGIC & DATA -->
+<script>
+// TOAST
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.innerHTML='<i class="fas fa-check-circle mr-2" style="color:var(--accent);"></i>'+msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('show'),3000);
+}
+window.showToast=showToast;
+
+// MOBILE MENU
+function openMob(){document.getElementById('mobMenu').classList.add('open');document.getElementById('mobOverlay').classList.add('open');}
+function closeMob(){document.getElementById('mobMenu').classList.remove('open');document.getElementById('mobOverlay').classList.remove('open');}
+window.openMob=openMob;window.closeMob=closeMob;
+
+// SCROLL REVEAL
+const revObs=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting)en.target.classList.add('vis');});},{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
+
+// COUNTER ANIMATION
+const cntObs=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting){en.target.querySelectorAll('[data-count]').forEach(c=>{const tgt=+c.dataset.count;let cur=0;const st=tgt/50;const ti=setInterval(()=>{cur+=st;if(cur>=tgt){cur=tgt;clearInterval(ti);}c.textContent=Math.floor(cur).toLocaleString();},30);});cntObs.unobserve(en.target);}});},{threshold:.5});
+document.querySelectorAll('#home').forEach(el=>cntObs.observe(el));
+
+// HEADER SHADOW
+addEventListener('scroll',()=>{document.getElementById('mainNav').style.boxShadow=scrollY>80?'0 4px 30px rgba(0,0,0,.4)':'none';},{passive:true});
+
+// ===== CROP RECOMMENDATION ENGINE =====
+const cropDB = [
+  {name:'Rice',soil:['alluvial','clay','loam'],season:'kharif',rain:['high','medium'],irrig:['yes','partial','no'],yieldRange:'35-55 qtl/ha',profit:'45,000-72,000',desc:'Best in waterlogged conditions. Requires nursery transplanting.',risk:'Low'},
+  {name:'Wheat',soil:['alluvial','loam','clay'],season:'rabi',rain:['medium','low'],irrig:['yes','partial'],yieldRange:'30-50 qtl/ha',profit:'32,000-55,000',desc:'Requires cool climate. Responsive to irrigation.',risk:'Low'},
+  {name:'Cotton',soil:['black','alluvial'],season:'kharif',rain:['medium','low'],irrig:['yes','partial','no'],yieldRange:'15-25 qtl/ha',profit:'55,000-95,000',desc:'Black soil ideal. Requires 150+ frost-free days.',risk:'Medium'},
+  {name:'Sugarcane',soil:['alluvial','loam','black'],season:'kharif',rain:['high','medium'],irrig:['yes'],yieldRange:'700-1000 qtl/ha',profit:'80,000-1,20,000',desc:'Long duration (12-18 months). Heavy feeder.',risk:'Low'},
+  {name:'Soybean',soil:['black','loam','alluvial'],season:'kharif',rain:['medium','high'],irrig:['yes','partial','no'],yieldRange:'12-20 qtl/ha',profit:'38,000-65,000',desc:'Nitrogen fixer. Good as rotation crop.',risk:'Low'},
+  {name:'Maize',soil:['alluvial','loam','sandy'],season:'kharif',rain:['medium','high'],irrig:['yes','partial'],yieldRange:'40-60 qtl/ha',profit:'28,000-48,000',desc:'Fast growing. Good for diversified farming.',risk:'Low'},
+  {name:'Groundnut',soil:['sandy','red','laterite'],season:'kharif',rain:['medium','low'],irrig:['partial','no'],yieldRange:'15-25 qtl/ha',profit:'50,000-85,000',desc:'Sandy loam best. Pod development needs dry soil.',risk:'Medium'},
+  {name:'Mustard',soil:['alluvial','loam','sandy'],season:'rabi',rain:['low','very-low'],irrig:['yes','partial'],yieldRange:'10-18 qtl/ha',profit:'35,000-60,000',desc:'Drought tolerant. Short duration crop.',risk:'Low'},
+  {name:'Chickpea',soil:['alluvial','loam','black'],season:'rabi',rain:['low','very-low'],irrig:['partial','no'],yieldRange:'10-18 qtl/ha',profit:'40,000-65,000',desc:'Nitrogen fixer. Ideal for dryland farming.',risk:'Low'},
+  {name:'Bajra (Pearl Millet)',soil:['sandy','laterite','red'],season:'kharif',rain:['low','very-low'],irrig:['no','partial'],yieldRange:'18-30 qtl/ha',profit:'22,000-38,000',desc:'Most drought tolerant cereal. Desert crop.',risk:'Very Low'},
+  {name:'Jowar (Sorghum)',soil:['black','sandy','laterite'],season:'kharif',rain:['low','medium'],irrig:['no','partial'],yieldRange:'20-35 qtl/ha',profit:'25,000-42,000',desc:'Dual purpose (grain + fodder). Drought hardy.',risk:'Low'},
+  {name:'Moong (Green Gram)',soil:['alluvial','loam','sandy'],season:'zaid',rain:['low','medium'],irrig:['yes','partial'],yieldRange:'5-10 qtl/ha',profit:'30,000-55,000',desc:'Short duration (60-70 days). Excellent pulse.',risk:'Low'},
+  {name:'Watermelon',soil:['sandy','loam','alluvial'],season:'zaid',rain:['low','very-low'],irrig:['yes'],yieldRange:'200-350 qtl/ha',profit:'60,000-1,10,000',desc:'Needs well-drained sandy soil. High value.',risk:'Medium'},
+  {name:'Cucumber',soil:['loam','alluvial','sandy'],season:'zaid',rain:['low','medium'],irrig:['yes'],yieldRange:'80-150 qtl/ha',profit:'45,000-85,000',desc:'Quick return crop. Trellis system recommended.',risk:'Medium'},
+  {name:'Onion',soil:['alluvial','loam'],season:'rabi',rain:['low','very-low'],irrig:['yes'],yieldRange:'200-350 qtl/ha',profit:'70,000-1,20,000',desc:'Requires well-drained soil. Good storage crop.',risk:'Medium'},
+  {name:'Potato',soil:['alluvial','loam','sandy'],season:'rabi',rain:['low','medium'],irrig:['yes'],yieldRange:'200-350 qtl/ha',profit:'55,000-95,000',desc:'Cool season crop. Requires loose soil for tuber development.',risk:'Low'},
+];
+
+function getCropRecommendation(){
+  const soil=document.getElementById('soilType').value;
+  const season=document.getElementById('season').value;
+  const rain=document.getElementById('rainfall').value;
+  const irrig=document.getElementById('irrigation').value;
+
+  if(!soil||!season||!rain){showToast('Please select soil type, season, and rainfall');return;}
+
+  let matches=cropDB.filter(c=>{
+    if(!c.soil.includes(soil))return false;
+    if(c.season!==season)return false;
+    if(!c.rain.includes(rain))return false;
+    if(!c.irrig.includes(irrig))return false;
+    return true;
+  });
+
+  // Fallback: relax irrigation constraint
+  if(matches.length===0){
+    matches=cropDB.filter(c=>c.soil.includes(soil)&&c.season===season&&c.rain.includes(rain));
+  }
+  if(matches.length===0){
+    matches=cropDB.filter(c=>c.soil.includes(soil)&&c.season===season);
+  }
+
+  const container=document.getElementById('cropResults');
+  if(matches.length===0){
+    container.innerHTML='<div class="card card-inner text-center" style="color:var(--muted);min-height:400px;display:flex;flex-direction:column;align-items:center;justify-content:center;"><i class="fas fa-exclamation-triangle text-4xl mb-3" style="color:var(--gold);"></i><p>No matching crops found for this combination. Try adjusting your parameters.</p></div>';
+    return;
+  }
+
+  let html=`<div class="flex items-center justify-between mb-4"><h3 class="text-xl font-bold"><i class="fas fa-check-circle mr-2" style="color:var(--accent);"></i>${matches.length} Crop${matches.length>1?'s':''} Recommended</h3></div><div class="space-y-4" style="max-height:500px;overflow-y:auto;">`;
+  matches.forEach((c,i)=>{
+    const riskColor=c.risk==='Very Low'?'var(--accent)':c.risk==='Low'?'var(--accent)':c.risk==='Medium'?'var(--gold)':'var(--red)';
+    html+=`<div class="result-card">
+      <div class="flex items-start justify-between mb-2">
+        <h4 class="text-lg font-bold">${c.name}</h4>
+        <span class="tag" style="background:${riskColor}22;color:${riskColor};">${c.risk} Risk</span>
+      </div>
+      <p class="text-sm mb-3" style="color:var(--fg2);">${c.desc}</p>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="text-xs"><span style="color:var(--muted);">Expected Yield:</span><br><strong>${c.yieldRange}</strong></div>
+        <div class="text-xs"><span style="color:var(--muted);">Profit Range:</span><br><strong style="color:var(--accent);">Rs. ${c.profit}/ha</strong></div>
+      </div>
+    </div>`;
+  });
+  html+='</div>';
+  container.innerHTML=html;
+  showToast(`Found ${matches.length} suitable crops`);
+}
+
+// ===== WEATHER DATA =====
+const forecastData=[
+  {day:'Monday',icon:'fa-cloud-sun',cond:'Partly Cloudy',max:32,min:24,rain:'10%',hum:65,wind:'12 km/h',adv:'Good day for spraying pesticides'},
+  {day:'Tuesday',icon:'fa-sun',cond:'Clear Sky',max:34,min:25,rain:'0%',hum:55,wind:'8 km/h',adv:'Ideal for harvesting and fieldwork'},
+  {day:'Wednesday',icon:'fa-cloud',cond:'Cloudy',max:30,min:23,rain:'25%',hum:72,wind:'15 km/h',adv:'Avoid irrigation, rain expected'},
+  {day:'Thursday',icon:'fa-cloud-showers-heavy',cond:'Heavy Rain',max:27,min:22,rain:'85%',hum:88,wind:'22 km/h',adv:'No field operations. Check drainage.'},
+  {day:'Friday',icon:'fa-cloud-rain',cond:'Light Rain',max:28,min:21,rain:'60%',hum:82,wind:'18 km/h',adv:'Transplanting favorable if rain stops'},
+  {day:'Saturday',icon:'fa-cloud-sun',cond:'Partly Cloudy',max:31,min:23,rain:'15%',hum:68,wind:'10 km/h',adv:'Good for fertilizer application'},
+  {day:'Sunday',icon:'fa-sun',cond:'Clear',max:33,min:24,rain:'5%',hum:60,wind:'9 km/h',adv:'Optimal for all farm activities'},
+];
+const ftb=document.getElementById('forecastTable');
+forecastData.forEach(f=>{
+  const rainNum=parseInt(f.rain);
+  const rainColor=rainNum>50?'var(--blue)':rainNum>20?'var(--gold)':'var(--muted)';
+  ftb.innerHTML+=`<tr><td class="font-medium">${f.day}</td><td><i class="fas ${f.icon} mr-1" style="color:var(--gold);"></i>${f.cond}</td><td><strong>${f.max} C</strong></td><td>${f.min} C</td><td style="color:${rainColor};font-weight:600;">${f.rain}</td><td>${f.hum}%</td><td>${f.wind}</td><td class="text-xs" style="color:var(--accent);">${f.adv}</td></tr>`;
+});
+
+// ===== MANDI PRICES =====
+const mandiData=[
+  {crop:'Wheat',cat:'grain',mandi:'Azadpur',state:'Delhi',min:2125,max:2350,modal:2240,trend:2.3},
+  {crop:'Rice (Pusa Basmati)',cat:'grain',mandi:'Karnal',state:'Haryana',min:2850,max:3200,modal:3050,trend:-1.2},
+  {crop:'Maize',cat:'grain',mandi:'Nizamabad',state:'Telangana',min:1780,max:1960,modal:1870,trend:3.5},
+  {crop:'Bajra',cat:'grain',mandi:'Jodhpur',state:'Rajasthan',min:2250,max:2480,modal:2360,trend:1.8},
+  {crop:'Jowar',cat:'grain',mandi:'Solapur',state:'Maharashtra',min:2650,max:2900,modal:2780,trend:-0.5},
+  {crop:'Tomato',cat:'vegetable',mandi:'Koyambedu',state:'Tamil Nadu',min:800,max:2200,modal:1500,trend:-8.2},
+  {crop:'Onion',cat:'vegetable',mandi:'Lasalgaon',state:'Maharashtra',min:1200,max:1800,modal:1550,trend:5.1},
+  {crop:'Potato',cat:'vegetable',mandi:'Agra',state:'Uttar Pradesh',min:900,max:1300,modal:1100,trend:2.7},
+  {crop:'Cauliflower',cat:'vegetable',mandi:'Azadpur',state:'Delhi',min:600,max:1200,modal:850,trend:-3.1},
+  {crop:'Green Gram',cat:'pulse',mandi:'Bhopal',state:'MP',min:6800,max:7500,modal:7200,trend:4.2},
+  {crop:'Bengal Gram',cat:'pulse',mandi:'Indore',state:'MP',min:5200,max:5800,modal:5500,trend:1.5},
+  {crop:'Pigeon Pea (Tur)',cat:'pulse',mandi:'Latur',state:'Maharashtra',min:6000,max:6800,modal:6400,trend:-2.1},
+  {crop:'Groundnut',cat:'oilseed',mandi:'Rajkot',state:'Gujarat',min:5200,max:6000,modal:5600,trend:3.8},
+  {crop:'Mustard',cat:'oilseed',mandi:'Alwar',state:'Rajasthan',min:4800,max:5400,modal:5100,trend:1.2},
+  {crop:'Soybean',cat:'oilseed',mandi:'Nagpur',state:'Maharashtra',min:4200,max:4700,modal:4450,trend:-0.8},
+  {crop:'Turmeric',cat:'spice',mandi:'Erode',state:'Tamil Nadu',min:8500,max:11000,modal:9800,trend:6.5},
+  {crop:'Cumin (Jeera)',cat:'spice',mandi:'Unjha',state:'Gujarat',min:18000,max:22000,modal:20000,trend:-1.5},
+  {crop:'Chilli (Dry)',cat:'spice',mandi:'Guntur',state:'AP',min:12000,max:16000,modal:14000,trend:2.0},
+  {crop:'Cotton (Kapas)',cat:'grain',mandi:'Rajkot',state:'Gujarat',min:6200,max:7000,modal:6600,trend:3.2},
+  {crop:'Sugarcane',cat:'grain',mandi:'Muzaffarnagar',state:'UP',min:305,max:350,modal:328,trend:0.5},
+];
+
+function filterMandi(cat,btn){
+  document.querySelectorAll('#mandi .tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered=cat==='all'?mandiData:mandiData.filter(m=>m.cat===cat);
+  renderMandi(filtered);
+}
+function renderMandi(data){
+  const tb=document.getElementById('mandiTable');
+  tb.innerHTML='';
+  data.forEach(m=>{
+    const tc=m.trend>0?'price-up':'price-down';
+    const arrow=m.trend>0?'fa-arrow-up':'fa-arrow-down';
+    tb.innerHTML+=`<tr><td class="font-medium">${m.crop}</td><td>${m.mandi}</td><td style="color:var(--muted);">${m.state}</td><td>Rs. ${m.min}</td><td>Rs. ${m.max}</td><td class="font-bold">Rs. ${m.modal}</td><td class="${tc}"><i class="fas ${arrow} mr-1"></i>${Math.abs(m.trend)}%</td></tr>`;
+  });
+}
+renderMandi(mandiData);
+
+// ===== SOIL ANALYSIS =====
+function analyzeSoil(){
+  const ph=parseFloat(document.getElementById('soilPH').value);
+  const n=parseFloat(document.getElementById('soilN').value);
+  const p=parseFloat(document.getElementById('soilP').value);
+  const k=parseFloat(document.getElementById('soilK').value);
+  const oc=parseFloat(document.getElementById('soilOC').value);
+  const ec=parseFloat(document.getElementById('soilEC').value);
+  const s=parseFloat(document.getElementById('soilS').value);
+  const zn=parseFloat(document.getElementById('soilZn').value);
+
+  if(isNaN(ph)||isNaN(n)||isNaN(p)||isNaN(k)){showToast('Please enter at least pH, N, P, and K values');return;}
+  
+  const validOc = isNaN(oc) ? 0.5 : oc;
+  const validEc = isNaN(ec) ? 1.0 : ec;
+
+  // Ratings
+  const phRating=ph>=6.0&&ph<=7.5?'Optimal':ph<6.0?'Acidic — needs liming':'Alkaline — needs gypsum';
+  const phColor=ph>=6.0&&ph<=7.5?'var(--accent)':(ph<6.0?'var(--gold)':'var(--red)');
+  const nRating=n>300?'High':n>200?'Medium':'Low';
+  const pRating=p>25?'High':p>15?'Medium':'Low';
+  const kRating=k>350?'High':k>250?'Medium':'Low';
+  const ocRating=validOc>.75?'Adequate':validOc>.5?'Moderate':'Low — add organic matter';
+  const ecRating=validEc<1?'Normal':validEc<2?'Slightly Saline':'Saline — needs treatment';
+
+  function ratingColor(r){return r==='High'||r==='Optimal'||r==='Normal'||r==='Adequate'?'var(--accent)':r==='Medium'||r==='Moderate'||r==='Slightly Saline'?'var(--gold)':'var(--red)';}
+
+  // Overall score
+  let score=0;
+  if(ph>=6&&ph<=7.5)score+=25;else if(ph>=5.5&&ph<=8)score+=15;else score+=5;
+  if(n>250)score+=15;else if(n>150)score+=10;else score+=3;
+  if(p>20)score+=15;else if(p>10)score+=10;else score+=3;
+  if(k>300)score+=15;else if(k>200)score+=10;else score+=3;
+  if(!isNaN(oc)){if(oc>.6)score+=15;else if(oc>.3)score+=8;else score+=2;} else score+=8;
+  if(!isNaN(ec)){if(ec<1)score+=15;else if(ec<2)score+=8;else score+=2;} else score+=8;
+  score=Math.min(score,100);
+
+  const overallLabel=score>=80?'Excellent':score>=60?'Good':score>=40?'Moderate':'Poor';
+  const overallColor=score>=80?'var(--accent)':score>=60?'var(--accent)':score>=40?'var(--gold)':'var(--red)';
+
+  // Deficiencies
+  let deficiencies=[];
+  if(n<250)deficiencies.push({nutrient:'Nitrogen',fix:'Apply Urea 40-60 kg/ha or DAP 100 kg/ha'});
+  if(p<20)deficiencies.push({nutrient:'Phosphorus',fix:'Apply SSP 150-200 kg/ha or DAP 100 kg/ha'});
+  if(k<300)deficiencies.push({nutrient:'Potassium',fix:'Apply MOP 60-80 kg/ha'});
+  if(!isNaN(s)&&s<10)deficiencies.push({nutrient:'Sulphur',fix:'Apply Gypsum 200 kg/ha or Sulphur 20 kg/ha'});
+  if(!isNaN(zn)&&zn<1.5)deficiencies.push({nutrient:'Zinc',fix:'Apply Zinc Sulphate 25 kg/ha as soil application'});
+  if(oc<.5)deficiencies.push({nutrient:'Organic Carbon',fix:'Add FYM 10-15 tonnes/ha or green manuring'});
+  if(ph<6.0)deficiencies.push({nutrient:'pH (Acidity)',fix:'Apply lime 2-4 tonnes/ha based on pH level'});
+  if(ph>7.5)deficiencies.push({nutrient:'pH (Alkalinity)',fix:'Apply gypsum 2-3 tonnes/ha'});
+  if(ec>1)deficiencies.push({nutrient:'Salinity',fix:'Improve drainage, apply gypsum, leach with good water'});
+
+  let defHtml=deficiencies.length?deficiencies.map(d=>`<div class="flex items-start gap-3 py-2" style="border-bottom:1px solid var(--border);"><i class="fas fa-exclamation-circle mt-1" style="color:var(--gold);"></i><div><strong>${d.nutrient}</strong><p class="text-xs mt-1" style="color:var(--fg2);">${d.fix}</p></div></div>`).join(''):'<p style="color:var(--accent);">No major deficiencies detected. Soil is well balanced.</p>';
+
+  document.getElementById('soilResults').innerHTML=`
+  <div class="space-y-4">
+    <div class="result-card text-center">
+      <div class="text-xs mb-1" style="color:var(--muted);">Overall Soil Health Score</div>
+      <div class="text-5xl font-black" style="color:${overallColor};">${score}</div>
+      <div class="tag mt-2" style="background:${overallColor}22;color:${overallColor};">${overallLabel}</div>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="card card-inner text-center"><div class="text-xs" style="color:var(--muted);">pH</div><div class="font-bold mt-1" style="color:${phColor};">${ph} — ${phRating.split('—')[0].trim()}</div></div>
+      <div class="card card-inner text-center"><div class="text-xs" style="color:var(--muted);">EC</div><div class="font-bold mt-1" style="color:${ratingColor(ecRating)};">${ec||'N/A'} — ${ecRating.split('—')[0].trim()}</div></div>
+      <div class="card card-inner text-center"><div class="text-xs" style="color:var(--muted);">Nitrogen</div><div class="font-bold mt-1" style="color:${ratingColor(nRating)};">${n||'N/A'} kg/ha — ${nRating}</div></div>
+      <div class="card card-inner text-center"><div class="text-xs" style="color:var(--muted);">Phosphorus</div><div class="font-bold mt-1" style="color:${ratingColor(pRating)};">${p||'N/A'} kg/ha — ${pRating}</div></div>
+      <div class="card card-inner text-center"><div class="text-xs" style="color:var(--muted);">Potassium</div><div class="font-bold mt-1" style="color:${ratingColor(kRating)};">${k||'N/A'} kg/ha — ${kRating}</div></div>
+      <div class="card card-inner text-center"><div class="text-xs" style="color:var(--muted);">Organic Carbon</div><div class="font-bold mt-1" style="color:${ratingColor(ocRating)};">${oc||'N/A'}% — ${ocRating.split('—')[0].trim()}</div></div>
+    </div>
+    <div class="card card-inner">
+      <h4 class="font-bold mb-3"><i class="fas fa-prescription-bottle-medical mr-2" style="color:var(--gold);"></i>Deficiencies & Corrections</h4>
+      ${defHtml}
+    </div>
+  </div>`;
+  showToast('Soil analysis complete — Score: '+score+'/100');
+}
+
+// ===== FERTILIZER CALCULATOR =====
+const fertDB={
+  rice:{n:{low:120,medium:80,high:40},p:{low:60,medium:40,high:20},k:{low:60,medium:40,high:20},baseCost:3200},
+  wheat:{n:{low:120,medium:80,high:40},p:{low:60,medium:40,high:20},k:{low:40,medium:30,high:15},baseCost:2800},
+  cotton:{n:{low:100,medium:60,high:30},p:{low:50,medium:30,high:15},k:{low:60,medium:40,high:20},baseCost:4500},
+  sugarcane:{n:{low:200,medium:150,high:80},p:{low:70,medium:50,high:25},k:{low:80,medium:50,high:30},baseCost:5500},
+  soybean:{n:{low:20,medium:10,high:0},p:{low:50,medium:30,high:15},k:{low:30,medium:20,high:10},baseCost:2600},
+  maize:{n:{low:150,medium:100,high:50},p:{low:60,medium:40,high:20},k:{low:50,medium:30,high:15},baseCost:3000},
+  groundnut:{n:{low:25,medium:15,high:0},p:{low:50,medium:30,high:15},k:{low:40,medium:25,high:12},baseCost:3800},
+  mustard:{n:{low:80,medium:50,high:25},p:{low:40,medium:25,high:12},k:{low:20,medium:10,high:5},baseCost:2500},
+};
+const fertPrices={urea:267,dap:1350,mop:870,ssp:400};
+
+function calcFertilizer(){
+  const crop=document.getElementById('fertCrop').value;
+  const area=parseFloat(document.getElementById('fertArea').value);
+  const nSt=document.getElementById('fertN').value;
+  const pSt=document.getElementById('fertP').value;
+  const kSt=document.getElementById('fertK').value;
+
+  if(!crop||!area||area<=0){showToast('Please select crop and enter valid area');return;}
+
+  const fd=fertDB[crop];
+  if(!fd){showToast('Crop data not available');return;}
+
+  const nReq=fd.n[nSt], pReq=fd.p[pSt], kReq=fd.k[kSt];
+  const areaHa=area*0.4047; // acres to hectares
+
+  // Calculate fertilizer quantities (N in kg from Urea 46%, P from DAP 18%, K from MOP 60%)
+  const urea=Math.ceil((nReq/0.46)*areaHa);
+  const dap=Math.ceil((pReq/0.18)*areaHa);
+  const mop=Math.ceil((kReq/0.60)*areaHa);
+
+  // Adjust urea if DAP also supplies N (DAP has 18% N)
+  const nFromDap=Math.floor(dap*0.18);
+  const ureaAdjusted=Math.max(0,urea-nFromDap);
+
+  const ureaCost=ureaAdjusted*fertPrices.urea;
+  const dapCost=dap*fertPrices.dap;
+  const mopCost=mop*fertPrices.mop;
+  const totalCost=ureaCost+dapCost+mopCost;
+
+  const costPerAcre=Math.round(totalCost/area);
+
+  document.getElementById('fertResults').innerHTML=`
+  <div class="space-y-4">
+    <div class="result-card">
+      <h4 class="font-bold mb-1"><i class="fas fa-leaf mr-2" style="color:var(--accent);"></i>${crop.charAt(0).toUpperCase()+crop.slice(1)} — ${area} acres (${areaHa.toFixed(2)} ha)</h4>
+      <p class="text-sm" style="color:var(--muted);">Nutrient requirement: N-${nReq} P-${pReq} K-${kReq} kg/ha</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="card card-inner text-center">
+        <div class="text-3xl font-black" style="color:var(--accent);">${ureaAdjusted}</div>
+        <div class="text-sm font-medium mt-1">kg Urea</div>
+        <div class="text-xs mt-1" style="color:var(--muted);">Rs. ${ureaCost.toLocaleString()}</div>
+      </div>
+      <div class="card card-inner text-center">
+        <div class="text-3xl font-black" style="color:var(--gold);">${dap}</div>
+        <div class="text-sm font-medium mt-1">kg DAP</div>
+        <div class="text-xs mt-1" style="color:var(--muted);">Rs. ${dapCost.toLocaleString()}</div>
+      </div>
+      <div class="card card-inner text-center">
+        <div class="text-3xl font-black" style="color:var(--purple);">${mop}</div>
+        <div class="text-sm font-medium mt-1">kg MOP</div>
+        <div class="text-xs mt-1" style="color:var(--muted);">Rs. ${mopCost.toLocaleString()}</div>
+      </div>
+    </div>
+    <div class="card card-inner">
+      <div class="flex justify-between items-center mb-3"><span style="color:var(--muted);">Total Fertilizer Cost</span><span class="text-2xl font-black" style="color:var(--accent);">Rs. ${totalCost.toLocaleString()}</span></div>
+      <div class="flex justify-between items-center mb-3"><span style="color:var(--muted);">Cost per Acre</span><span class="text-lg font-bold">Rs. ${costPerAcre.toLocaleString()}</span></div>
+      <hr style="border-color:var(--border);margin:12px 0;">
+      <h5 class="font-bold text-sm mb-2">Application Schedule</h5>
+      <div class="text-xs space-y-1" style="color:var(--fg2);">
+        <p><strong>Basal Dose (at sowing):</strong> Full DAP + Full MOP + 1/3 Urea</p>
+        <p><strong>1st Top Dressing (30 DAS):</strong> 1/3 Urea</p>
+        <p><strong>2nd Top Dressing (60 DAS):</strong> 1/3 Urea</p>
+      </div>
+    </div>
+    <div class="card card-inner">
+      <h5 class="font-bold text-sm mb-2"><i class="fas fa-lightbulb mr-1" style="color:var(--gold);"></i>Farm Advisory</h5>
+      <ul class="text-xs space-y-1" style="color:var(--fg2);">
+        <li>Apply fertilizers in split doses for better uptake efficiency</li>
+        <li>Ensure adequate soil moisture at time of application</li>
+        <li>Consider adding 5-10 tonnes FYM per hectare for organic matter</li>
+        <li>Get soil tested every 2 years to adjust doses</li>
+        ${crop==='rice'?'<li>For flooded rice, apply urea in reduced water conditions to minimize volatilization loss</li>':''}
+        ${crop==='groundnut'||crop==='soybean'?'<li>These are legumes — they fix their own nitrogen. Minimal N needed.</li>':''}
+      </ul>
+    </div>
+  </div>`;
+  showToast('Fertilizer recommendation ready');
+}
+
+// ===== PEST & DISEASE DATA =====
+const pestData=[
+  {name:'Stem Borer',type:'insect',crop:'Rice',symptom:'Dead hearts in young plants, white ears at maturity',treatment:'Apply Chlorantraniliprole 0.4% GR @ 10 kg/ha at 20 DAT. Use pheromone traps.',preventive:'Use resistant varieties, clean stubbles, maintain water depth.',icon:'fa-bug'},
+  {name:'Brown Plant Hopper',type:'insect',crop:'Rice',symptom:'Hopper burn — yellowing and drying of plants from bottom',treatment:'Spray Imidacloprid 17.8% SL @ 150 ml/ha. Drain water before spray.',preventive:'Avoid excess nitrogen, use balanced fertilization.',icon:'fa-bug'},
+  {name:'Helicoverpa (Pod Borer)',type:'insect',crop:'Cotton, Chickpea',symptom:'Bored holes in pods/bolls, larvae visible inside',treatment:'Spray Emamectin Benzoate 5% SG @ 220 g/ha or nuclear polyhedrosis virus.',preventive:'Install pheromone traps @ 5/ha, release Trichogramma wasps.',icon:'fa-bug'},
+  {name:'Whitefly',type:'insect',crop:'Cotton, Vegetables',symptom:'Yellowing of leaves, sticky honeydew, sooty mold growth',treatment:'Spray Dinotefuran 20% SG @ 50 g/ha or Neem oil 2%.',preventive:'Remove weed hosts, use yellow sticky traps.',icon:'fa-bug'},
+  {name:'Termites',type:'insect',crop:'Wheat, Sugarcane',symptom:'Wilting of plants, hollow stems, mud galleries on roots',treatment:'Apply Chlorpyrifos 20% EC @ 2L/ha as soil drench.',preventive:'Destroy termite mounds, avoid raw FYM, use treated seed.',icon:'fa-bug'},
+  {name:'Rice Blast',type:'fungus',crop:'Rice',symptom:'Diamond-shaped lesions on leaves, neck rot',treatment:'Spray Tricyclazole 75% WP @ 0.6 g/L at neck emergence.',preventive:'Use resistant varieties, avoid excess nitrogen, maintain field hygiene.',icon:'fa-disease'},
+  {name:'Late Blight',type:'fungus',crop:'Potato, Tomato',symptom:'Water-soaked dark lesions on leaves, white fuzzy growth on underside',treatment:'Spray Mancozeb 75% WP @ 2.5 g/L or Metalaxyl + Mancozeb.',preventive:'Ensure good drainage, avoid overhead irrigation, remove infected plants.',icon:'fa-disease'},
+  {name:'Powdery Mildew',type:'fungus',crop:'Wheat, Vegetables',symptom:'White powdery patches on leaves and stems',treatment:'Spray Sulphur 80% WP @ 3 g/L or Propiconazole 25% EC.',preventive:'Maintain plant spacing, avoid water stress, use resistant varieties.',icon:'fa-disease'},
+  {name:'Red Rot',type:'fungus',crop:'Sugarcane',symptom:'Reddening of internodes, sour smell, rotting from inside',treatment:'Use disease-free setts, treat with Carbendazim 0.1% before planting.',preventive:'Crop rotation, avoid ratooning in infected fields, use resistant varieties.',icon:'fa-disease'},
+  {name:'Tungro Virus',type:'virus',crop:'Rice',symptom:'Stunting, yellow-orange leaf discoloration, reduced tillering',treatment:'No cure once infected. Remove and destroy infected plants.',preventive:'Control green leafhopper vector, use resistant varieties.',icon:'fa-virus'},
+  {name:'Leaf Curl Virus',type:'virus',crop:'Cotton, Tomato',symptom:'Upward curling of leaves, thickened veins, stunting',treatment:'No direct cure. Remove infected plants, control whitefly vector.',preventive:'Use virus-free seeds, manage whitefly population, remove weed hosts.',icon:'fa-virus'},
+  {name:'Bacterial Leaf Blight',type:'bacterial',crop:'Rice',symptom:'Water-soaked to yellowish stripes on leaf blades, drying from tips',treatment:'Spray Streptocycline 500 ppm + Copper Oxychloride 0.3%.',preventive:'Use certified seeds, avoid clipping of seedlings, balanced nutrition.',icon:'fa-bacterium'},
+  {name:'Bacterial Wilt',type:'bacterial',crop:'Tomato, Potato',symptom:'Sudden wilting of plants, brown discoloration of vascular bundles',treatment:'No effective chemical control. Remove and destroy infected plants.',preventive:'Use resistant varieties, crop rotation with non-solanaceous crops, soil solarization.',icon:'fa-bacterium'},
+];
+
+function filterPest(type,btn){
+  document.querySelectorAll('#pest .tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPest(type==='all'?pestData:pestData.filter(p=>p.type===type));
+}
+function renderPest(data){
+  const g=document.getElementById('pestGrid');
+  g.innerHTML='';
+  data.forEach(p=>{
+    const typeColor=p.type==='insect'?'var(--gold)':p.type==='fungus'?'var(--accent)':p.type==='virus'?'var(--purple)':'var(--blue)';
+    g.innerHTML+=`<div class="card card-lift">
+      <div class="pest-img"><i class="fas ${p.icon}"></i></div>
+      <div class="card-inner">
+        <div class="flex items-center gap-2 mb-2">
+          <h4 class="font-bold">${p.name}</h4>
+          <span class="tag" style="background:${typeColor}22;color:${typeColor};">${p.type}</span>
+        </div>
+        <div class="text-xs mb-1" style="color:var(--muted);">Affects: ${p.crop}</div>
+        <div class="text-sm mb-3" style="color:var(--fg2);"><strong>Symptoms:</strong> ${p.symptom}</div>
+        <div class="text-sm mb-2" style="color:var(--accent);"><strong>Treatment:</strong> ${p.treatment}</div>
+        <div class="text-xs" style="color:var(--muted);"><strong>Prevention:</strong> ${p.preventive}</div>
+      </div>
+    </div>`;
+  });
+}
+renderPest(pestData);
+
+// ===== GOVERNMENT SCHEMES =====
+const schemesData=[
+  {name:'PM-KISAN',cat:'central',desc:'Direct income support of Rs. 6,000 per year in three installments to all landholding farmer families.',benefit:'Rs. 6,000/year',eligibility:'All farmer families with cultivable land',link:'pmkisan.gov.in',status:'Active'},
+  {name:'Pradhan Mantri Fasal Bima Yojana',cat:'insurance',desc:'Crop insurance at minimal premium — 2% for Kharif, 1.5% for Rabi, 5% for commercial crops.',benefit:'Full sum insured against crop loss',eligibility:'All farmers growing notified crops',link:'pmfby.gov.in',status:'Active'},
+  {name:'Kisan Credit Card (KCC)',cat:'loan',desc:'Short-term credit for crop production, post-harvest, and consumption needs at 4% interest (with subsidy).',benefit:'Up to Rs. 3 lakh at 4% interest',eligibility:'Farmers, fishermen, animal husbandry farmers',link:'Any nationalized bank',status:'Active'},
+  {name:'Soil Health Card Scheme',cat:'infra',desc:'Free soil testing and Soil Health Card with crop-wise fertilizer recommendations for every farmer.',benefit:'Free soil testing + recommendations',eligibility:'All farmers',link:'soilhealth.dac.gov.in',status:'Active'},
+  {name:'PM Krishi Sinchayee Yojana',cat:'infra',desc:'Subsidy on micro-irrigation (drip/sprinkler) — up to 55% for small farmers.',benefit:'55% subsidy on micro-irrigation',eligibility:'All farmers (higher for small/marginal)',link:'pmksy.gov.in',status:'Active'},
+  {name:'e-NAM (National Agriculture Market)',cat:'infra',desc:'Online trading portal connecting mandis. Better price discovery, transparent bidding.',benefit:'Better prices, transparent trading',eligibility:'All farmers and traders',link:'enam.gov.in',status:'Active'},
+  {name:'PM AASHA',cat:'central',desc:'Price protection scheme — government procures at MSP when market price falls below MSP.',benefit:'MSP guarantee for notified crops',eligibility:'Farmers growing MSP-notified crops',link:'Cabinet decision portal',status:'Active'},
+  {name:'Sub Mission on Agricultural Mechanization',cat:'infra',desc:'Subsidy up to 50% on farm machinery — tractors, harvesters, post-harvest equipment.',benefit:'40-50% subsidy on machinery',eligibility:'All farmers (higher for small/marginal)',link:'agrimachinery.nic.in',status:'Active'},
+  {name:'Interest Subvention Scheme',cat:'loan',desc:'Additional 2% interest subvention on crop loans up to Rs. 3 lakh for prompt payers.',benefit:'Effective 2% interest on crop loan',eligibility:'KCC holders with prompt repayment',link:'Through banks',status:'Active'},
+  {name:'Rashtriya Krishi Vikas Yojana',cat:'central',desc:'State-level agriculture development projects with 60:40 central-state funding ratio.',benefit:'Project-based infrastructure support',eligibility:'State governments propose projects',link:'rkvy.nic.in',status:'Active'},
+];
+
+function filterSchemes(cat,btn){
+  document.querySelectorAll('#schemes .tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSchemes(cat==='all'?schemesData:schemesData.filter(s=>s.cat===cat));
+}
+function renderSchemes(data){
+  const g=document.getElementById('schemesGrid');
+  g.innerHTML='';
+  data.forEach(s=>{
+    const catColor=s.cat==='central'?'var(--accent)':s.cat==='insurance'?'var(--blue)':s.cat==='loan'?'var(--gold)':'var(--purple)';
+    const catLabel=s.cat==='central'?'Central':s.cat==='insurance'?'Insurance':s.cat==='loan'?'Credit/Loan':'Infrastructure';
+    g.innerHTML+=`<div class="card card-lift card-inner">
+      <div class="flex items-start justify-between mb-3">
+        <h4 class="text-lg font-bold leading-tight">${s.name}</h4>
+        <span class="tag flex-shrink-0 ml-2" style="background:${catColor}22;color:${catColor};">${catLabel}</span>
+      </div>
+      <p class="text-sm mb-3" style="color:var(--fg2);">${s.desc}</p>
+      <div class="grid grid-cols-2 gap-2 mb-3 text-xs">
+        <div><span style="color:var(--muted);">Benefit:</span><br><strong style="color:var(--accent);">${s.benefit}</strong></div>
+        <div><span style="color:var(--muted);">Eligibility:</span><br><strong>${s.eligibility}</strong></div>
+      </div>
+      <div class="flex items-center justify-between pt-3" style="border-top:1px solid var(--border);">
+        <span class="text-xs" style="color:var(--muted);"><i class="fas fa-globe mr-1"></i>${s.link}</span>
+        <span class="tag" style="background:rgba(52,211,153,.1);color:var(--accent);">${s.status}</span>
+      </div>
+    </div>`;
+  });
+}
+renderSchemes(schemesData);
+</script>
 </body>
-
 </html>
