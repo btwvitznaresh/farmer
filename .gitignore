@@ -74,3 +74,6 @@ verify_*.wav
 
 ### Package managers ###
 bun.lockb
+
+### Runtime API config (contains keys) ###
+public/config.js
