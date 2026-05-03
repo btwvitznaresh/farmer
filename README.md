@@ -6,8 +6,6 @@
 ![PWA](https://img.shields.io/badge/PWA-Ready-blue)
 ![Offline](https://img.shields.io/badge/Offline-First-orange)
 
----
-
 ## 🚀 Features
 
 - **🎤 Voice-First Interaction**: Ask questions in Hindi, Tamil, Telugu, Marathi, or English
@@ -17,8 +15,6 @@
 - **📚 Library**: Save and review past diagnoses and analyses
 - **🌐 Multi-language Support**: Full UI localization in 5 Indian languages
 - **📱 PWA/Installable**: Works as a native app on Android, iOS, and Desktop
-
----
 
 ## 🌍 Offline-First Architecture
 
@@ -37,8 +33,6 @@ AgroTalk Assist is designed for low-connectivity rural environments:
 ### 🧠 Local Wisdom (Offline AI)
 When offline, the AI switches to a **Local Knowledge Base** with 100+ crop-specific Q&A entries covering common diseases, treatments, and farming advice.
 
----
-
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
@@ -52,58 +46,37 @@ When offline, the AI switches to a **Local Knowledge Base** with 100+ crop-speci
 | Database | IndexedDB (idb) |
 | PWA | vite-plugin-pwa, Workbox |
 
----
-
 ## 📦 Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/btwvitznaresh/farmer.git
+git clone https://github.com/Rehan-star-007/agrotalk-assist.git
 
 # Navigate to project directory
-cd farmer
+cd agrotalk-assist
 
-# Install ALL dependencies (frontend + backend) — run this once after cloning
-npm run install:all
-```
+# Install dependencies
+npm install
 
-> **Note:** Run `npm run install:all` once after cloning to install both the root and backend dependencies. You only need to run plain `npm install` again if you add new root packages.
-
----
-
-## 🔧 Development
-
-```bash
-# Start frontend only
+# Start the development server
 npm run dev
 
-# Start backend only (in a separate terminal)
+# Start the backend (in another terminal)
 npm run dev:backend
-
-# Start both frontend + backend together
-npm run dev:full
-
-# Start Python backend
-npm run dev:python
 ```
-
----
 
 ## 🔧 Environment Variables
 
-Create a `.env` file in the project root:
-
+Create a `.env` file:
 ```env
 VITE_MANDI_API_KEY=your_api_key_here
 VITE_API_URL=http://localhost:3001
 ```
 
----
-
 ## 📁 Project Structure
 
 ```
-farmer/
+agrotalk-assist/
 ├── src/
 │   ├── components/     # React components
 │   ├── pages/          # Page components
@@ -116,8 +89,6 @@ farmer/
 ├── public/             # Static assets
 └── docs/               # Documentation
 ```
-
----
 
 ## 🧪 Testing
 
@@ -135,23 +106,10 @@ npx tsc --noEmit
 npm run lint
 ```
 
----
-
-## 🚀 Deployment
-
-```bash
-# Build and deploy to Firebase
-npm run deploy
-```
-
----
-
 ## 👥 Team
 
 Built with ❤️ for Indian farmers
 
----
-
 ## 📄 License
 
-MIT License — feel free to use this project for educational purposes.
+MIT License - feel free to use this project for educational purposes.

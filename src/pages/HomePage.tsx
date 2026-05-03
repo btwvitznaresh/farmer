@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Farm3D } from '@/components/ui/Farm3D';
 
 interface IWindow {
     webkitSpeechRecognition: any;
@@ -60,35 +61,11 @@ export default function HomePage() {
     const voiceMenuRef = useRef<HTMLDivElement>(null);
 
     const [showVoiceMenu, setShowVoiceMenu] = useState(false);
-    const [onboardingStep, setOnboardingStep] = useState<number>(() => (localStorage.getItem('agro_onboarding_done') === 'true' ? 0 : 1));
-    const [onboardingName, setOnboardingName] = useState(() => localStorage.getItem('agro_farmer_name') || '');
-    const [onboardingLocation, setOnboardingLocation] = useState(() => localStorage.getItem('agro_farm_location') || '');
-    const [onboardingCrops, setOnboardingCrops] = useState<string[]>(() => {
-        const cached = localStorage.getItem('agro_main_crops');
-        return cached ? JSON.parse(cached) : [];
-    });
     const navigate = useNavigate();
 
     const t = getTranslation('home', language);
     const tVoice = getTranslation('voice', language);
     const tCall = getTranslation('call', language);
-    const homeUiText: Record<string, { activeAgent: string; voicePersona: string; stop: string; listen: string; offlineSpeech: string; micDenied: string }> = {
-        en: { activeAgent: 'Active Agent', voicePersona: 'Voice Persona', stop: 'Stop', listen: 'Listen', offlineSpeech: 'Offline speech not supported', micDenied: 'Microphone access denied' },
-        hi: { activeAgent: 'सक्रिय एजेंट', voicePersona: 'आवाज़ विकल्प', stop: 'रोकें', listen: 'सुनें', offlineSpeech: 'ऑफलाइन भाषण समर्थित नहीं है', micDenied: 'माइक्रोफोन अनुमति अस्वीकृत' },
-        ta: { activeAgent: 'செயலில் உள்ள முகவர்', voicePersona: 'குரல் சுயவிவரம்', stop: 'நிறுத்து', listen: 'கேள்', offlineSpeech: 'ஆஃப்லைன் பேச்சு ஆதரிக்கப்படவில்லை', micDenied: 'மைக்ரோஃபோன் அணுகல் மறுக்கப்பட்டது' },
-        te: { activeAgent: 'సక్రియ ఏజెంట్', voicePersona: 'వాయిస్ ప్రొఫైల్', stop: 'ఆపు', listen: 'విని', offlineSpeech: 'ఆఫ్‌లైన్ స్పీచ్ అందుబాటులో లేదు', micDenied: 'మైక్రోఫోన్ యాక్సెస్ నిరాకరించబడింది' },
-        mr: { activeAgent: 'सक्रिय एजंट', voicePersona: 'आवाज प्रोफाइल', stop: 'थांबा', listen: 'ऐका', offlineSpeech: 'ऑफलाइन भाषण समर्थित नाही', micDenied: 'मायक्रोफोन प्रवेश नाकारला' },
-    };
-    const ui = homeUiText[language] || homeUiText.en;
-    const onboardingText: Record<string, { welcome: string; step1: string; step2: string; step3: string; selectLanguage: string; yourName: string; farmLocation: string; mainCrops: string; next: string; back: string; finish: string }> = {
-        en: { welcome: "Welcome to AgroTalk", step1: "Step 1: Select your language", step2: "Step 2: Enter your name & farm location", step3: "Step 3: Choose your main crops", selectLanguage: "Choose language", yourName: "Your name", farmLocation: "Farm location", mainCrops: "Main crops", next: "Next", back: "Back", finish: "Finish" },
-        hi: { welcome: "AgroTalk में आपका स्वागत है", step1: "चरण 1: भाषा चुनें", step2: "चरण 2: अपना नाम और फार्म स्थान भरें", step3: "चरण 3: अपनी मुख्य फसलें चुनें", selectLanguage: "भाषा चुनें", yourName: "आपका नाम", farmLocation: "फार्म स्थान", mainCrops: "मुख्य फसलें", next: "अगला", back: "वापस", finish: "पूरा करें" },
-        ta: { welcome: "AgroTalkக்கு வரவேற்கிறோம்", step1: "படி 1: மொழியை தேர்ந்தெடுக்கவும்", step2: "படி 2: பெயர் மற்றும் பண்ணை இடத்தை உள்ளிடவும்", step3: "படி 3: முக்கிய பயிர்களை தேர்வு செய்யவும்", selectLanguage: "மொழி தேர்வு", yourName: "உங்கள் பெயர்", farmLocation: "பண்ணை இடம்", mainCrops: "முக்கிய பயிர்கள்", next: "அடுத்து", back: "பின்", finish: "முடிக்கவும்" },
-        te: { welcome: "AgroTalk కి స్వాగతం", step1: "దశ 1: భాషను ఎంచుకోండి", step2: "దశ 2: మీ పేరు మరియు ఫారం స్థలం నమోదు చేయండి", step3: "దశ 3: మీ ప్రధాన పంటలను ఎంచుకోండి", selectLanguage: "భాష ఎంపిక", yourName: "మీ పేరు", farmLocation: "ఫారం స్థలం", mainCrops: "ప్రధాన పంటలు", next: "తదుపరి", back: "వెనుకకు", finish: "పూర్తి చేయి" },
-        mr: { welcome: "AgroTalk मध्ये स्वागत", step1: "पायरी 1: भाषा निवडा", step2: "पायरी 2: नाव आणि शेत स्थान भरा", step3: "पायरी 3: मुख्य पिके निवडा", selectLanguage: "भाषा निवडा", yourName: "तुमचे नाव", farmLocation: "शेत स्थान", mainCrops: "मुख्य पिके", next: "पुढे", back: "मागे", finish: "पूर्ण करा" },
-    };
-    const onboard = onboardingText[language] || onboardingText.en;
-    const cropOptions = ['Paddy', 'Wheat', 'Cotton', 'Tomato', 'Onion', 'Maize'];
 
 
     // Available NVIDIA Magpie voices
@@ -117,15 +94,6 @@ export default function HomePage() {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [chatMessages, isProcessing]);
-
-    useEffect(() => {
-        const pref = localStorage.getItem("agro_prefill_chat");
-        if (pref) {
-            setIsChatMode(true);
-            setTextInput(pref);
-            localStorage.removeItem("agro_prefill_chat");
-        }
-    }, [setIsChatMode, setTextInput]);
 
     const addMessage = (role: 'user' | 'assistant', content: string, condition?: string) => {
         setChatMessages(prev => [...prev, {
@@ -358,7 +326,7 @@ export default function HomePage() {
 
     const startBackendSTT = async () => {
         if (!navigator.onLine) {
-            toast.error(ui.offlineSpeech);
+            toast.error("Offline speech not supported");
             return;
         }
 
@@ -379,20 +347,7 @@ export default function HomePage() {
                 setIsChatMode(true);
                 try {
                     const result = await transcribeAndGetAdvice(blob, language, undefined, conversationHistory, true, conversationId);
-                    if (result.success && result.transcript && result.advisory) {
-                        if (result.newLanguage && result.newLanguage !== language) {
-                            setLanguage(result.newLanguage as any);
-                        }
-
-                        addMessage('user', result.transcript);
-                        addMessage('assistant', result.advisory.recommendation, result.advisory.condition);
-                        setConversationHistory(prev => [
-                            ...prev,
-                            { role: 'user' as const, content: result.transcript! },
-                            { role: 'assistant' as const, content: result.advisory!.recommendation }
-                        ].slice(-10));
-                        playResponse(result.advisory.recommendation, result.audio);
-                    } else if (result.success && result.transcript) {
+                    if (result.success && result.transcript) {
                         await processResponse(result.transcript);
                     }
                 } catch (e) {
@@ -406,7 +361,7 @@ export default function HomePage() {
             setIsRecording(true);
         } catch (e) {
             console.error("Mic access denied", e);
-            toast.error(ui.micDenied);
+            toast.error("Microphone access denied");
         }
     };
 
@@ -441,106 +396,10 @@ export default function HomePage() {
         return ph[language] || ph.en;
     };
 
-    const finishOnboarding = () => {
-        localStorage.setItem('agro_farmer_name', onboardingName.trim());
-        localStorage.setItem('agro_farm_location', onboardingLocation.trim());
-        localStorage.setItem('agro_main_crops', JSON.stringify(onboardingCrops));
-        localStorage.setItem('agro_onboarding_done', 'true');
-        setOnboardingStep(0);
-    };
-
-    if (onboardingStep > 0) {
-        return (
-            <div className="min-h-screen bg-background flex items-center justify-center p-4 animate-in fade-in duration-500">
-                <div className="w-full max-w-md rounded-3xl border border-border bg-card/90 backdrop-blur p-6 shadow-apple-lg">
-                    <h1 className="text-2xl font-black text-foreground mb-1">{onboard.welcome}</h1>
-                    <p className="text-[14px] text-[#555] dark:text-zinc-300 mb-5">
-                        {onboardingStep === 1 ? onboard.step1 : onboardingStep === 2 ? onboard.step2 : onboard.step3}
-                    </p>
-
-                    {onboardingStep === 1 && (
-                        <div className="space-y-3">
-                            <p className="text-[14px] font-semibold text-foreground">{onboard.selectLanguage}</p>
-                            <LanguageSelector selectedLanguage={language} onLanguageChange={setLanguage} />
-                        </div>
-                    )}
-
-                    {onboardingStep === 2 && (
-                        <div className="space-y-3">
-                            <input
-                                value={onboardingName}
-                                onChange={(e) => setOnboardingName(e.target.value)}
-                                placeholder={onboard.yourName}
-                                className="w-full h-11 px-3 rounded-xl border border-border bg-background text-[14px]"
-                            />
-                            <input
-                                value={onboardingLocation}
-                                onChange={(e) => setOnboardingLocation(e.target.value)}
-                                placeholder={onboard.farmLocation}
-                                className="w-full h-11 px-3 rounded-xl border border-border bg-background text-[14px]"
-                            />
-                        </div>
-                    )}
-
-                    {onboardingStep === 3 && (
-                        <div className="space-y-3">
-                            <p className="text-[14px] font-semibold text-foreground">{onboard.mainCrops}</p>
-                            <div className="flex flex-wrap gap-2">
-                                {cropOptions.map((crop) => {
-                                    const selected = onboardingCrops.includes(crop);
-                                    return (
-                                        <button
-                                            key={crop}
-                                            type="button"
-                                            onClick={() => setOnboardingCrops((prev) => selected ? prev.filter((c) => c !== crop) : [...prev, crop])}
-                                            className={cn(
-                                                "px-3 py-1.5 rounded-full text-[14px] border transition-colors",
-                                                selected ? "bg-primary text-white border-primary" : "bg-background text-foreground border-border"
-                                            )}
-                                        >
-                                            {crop}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="flex items-center justify-between mt-6">
-                        <button
-                            type="button"
-                            onClick={() => setOnboardingStep((s) => Math.max(1, s - 1))}
-                            className="text-[14px] font-semibold text-muted-foreground disabled:opacity-30"
-                            disabled={onboardingStep === 1}
-                        >
-                            {onboard.back}
-                        </button>
-                        {onboardingStep < 3 ? (
-                            <button
-                                type="button"
-                                onClick={() => setOnboardingStep((s) => Math.min(3, s + 1))}
-                                className="px-4 py-2 rounded-xl bg-primary text-white text-[14px] font-semibold"
-                            >
-                                {onboard.next}
-                            </button>
-                        ) : (
-                            <button
-                                type="button"
-                                onClick={finishOnboarding}
-                                className="px-4 py-2 rounded-xl bg-primary text-white text-[14px] font-semibold"
-                            >
-                                {onboard.finish}
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     if (isChatMode) {
         return (
             <div className="flex flex-col h-full bg-background pb-24 relative overflow-hidden">
+                <Farm3D />
                 {/* Background Glow */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
@@ -561,7 +420,7 @@ export default function HomePage() {
                             <h1 className="text-[17px] font-black text-foreground tracking-tight leading-none">AgroTalk <span className="text-primary italic">AI</span></h1>
                             <div className="flex items-center gap-1.5 mt-1">
                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">{t.activeAgent || ui.activeAgent}</span>
+                                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">{t.activeAgent || 'Active Agent'}</span>
                             </div>
                         </div>
                     </div>
@@ -586,7 +445,7 @@ export default function HomePage() {
                             {showVoiceMenu && (
                                 <div className="absolute right-0 top-full mt-3 z-50 w-56 bg-card/90 backdrop-blur-2xl rounded-2xl border border-border/60 shadow-2xl py-2 animate-in fade-in zoom-in-95 duration-200">
                                     <div className="px-4 py-2 mb-1 border-b border-border/30">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{t.voicePersona || ui.voicePersona}</span>
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{t.voicePersona || 'Voice Persona'}</span>
                                     </div>
                                     <div className="px-2 space-y-1">
                                         {voiceOptions.map((voice) => (
@@ -681,7 +540,7 @@ export default function HomePage() {
                                                                 isMuted && 'opacity-50 cursor-not-allowed'
                                                             )}
                                                         >
-                                                            {currentPlayingId === msg.id && isPlaying ? <><Pause className="w-3 h-3" /><span>{ui.stop}</span></> : <><Play className="w-3 h-3" /><span>{ui.listen}</span></>}
+                                                            {currentPlayingId === msg.id && isPlaying ? <><Pause className="w-3 h-3" /><span>Stop</span></> : <><Play className="w-3 h-3" /><span>Listen</span></>}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -715,9 +574,20 @@ export default function HomePage() {
                 </ScrollArea>
 
                 {/* Chat Input */}
-                <div className="border-t border-border/50 bg-background/80 backdrop-blur-xl p-3 pb-4">
-                    <div className="max-w-2xl mx-auto">
-                        <form onSubmit={handleTextSubmit} className="flex gap-2 items-center">
+                < div className="border-t border-border/50 bg-background/80 backdrop-blur-xl p-3 pb-4" >
+                    <div className="max-w-2xl mx-auto flex items-center gap-3">
+                        <button
+                            onClick={handleMicClick}
+                            className={cn(
+                                'w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95',
+                                isRecording
+                                    ? 'bg-red-500 text-white animate-pulse'
+                                    : 'bg-primary text-white shadow-green'
+                            )}
+                        >
+                            <Mic size={24} />
+                        </button>
+                        <form onSubmit={handleTextSubmit} className="flex-1 flex gap-2">
                             <div className="relative flex-1">
                                 <input
                                     type="text"
@@ -734,54 +604,48 @@ export default function HomePage() {
                                     )}
                                     disabled={isProcessing}
                                 />
-                            </div>
-                            {textInput.trim() && (
-                                <button
-                                    type="submit"
-                                    disabled={isProcessing}
-                                    className={cn(
-                                        'w-11 h-11 rounded-full',
-                                        'bg-[#76b900] text-white',
-                                        'flex items-center justify-center',
-                                        'hover:bg-[#5da600]',
-                                        'active:scale-95 transition-all duration-200',
-                                        'disabled:opacity-50 disabled:cursor-not-allowed'
-                                    )}
-                                >
-                                    <ArrowRight size={20} strokeWidth={2.5} />
-                                </button>
-                            )}
-                            <button
-                                type="button"
-                                onClick={handleMicClick}
-                                className={cn(
-                                    'w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95',
-                                    isRecording
-                                        ? 'bg-red-500 text-white animate-pulse'
-                                        : 'bg-primary text-white shadow-green'
+                                {textInput.trim() && (
+                                    <button
+                                        type="submit"
+                                        disabled={isProcessing}
+                                        className={cn(
+                                            'absolute right-2 top-1/2 -translate-y-1/2',
+                                            'w-10 h-10 rounded-full',
+                                            'bg-[#76b900] text-white',
+                                            'flex items-center justify-center',
+                                            'hover:bg-[#5da600]',
+                                            'active:scale-95 transition-all duration-200',
+                                            'disabled:opacity-50 disabled:cursor-not-allowed'
+                                        )}
+                                    >
+                                        <ArrowRight size={20} strokeWidth={2.5} />
+                                    </button>
                                 )}
-                            >
-                                <Mic size={22} />
-                            </button>
+                            </div>
                         </form>
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
         );
     }
 
     // Default home screen
     return (
-        <div className="flex flex-col flex-1 bg-background min-h-screen pb-32 lg:pb-0 relative overflow-hidden transition-opacity duration-300">
-            {/* Background glowing effects for premium feel */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+        <div className="flex flex-col flex-1 min-h-screen pb-32 lg:pb-0 relative overflow-hidden"
+          style={{
+            background: 'radial-gradient(ellipse at 60% 20%, #0a1a00 0%, #050d00 40%, #000000 100%)'
+          }}
+        >
+            <Farm3D />
+            {/* Vivid green glow at top */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-primary/20 rounded-full blur-[100px] pointer-events-none -z-10" />
 
             {/* ── Top bar ── */}
-            <header className="flex items-center justify-between px-4 pt-4 pb-3 z-10 relative">
+            <header className="flex items-center justify-between px-5 lg:px-8 pt-5 pb-3 z-10 relative">
                 <div className="flex items-center gap-2.5">
                     <button
                         onClick={() => navigate('/call-agent')}
-                        className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full bg-card border border-border/50 hover:bg-muted transition-colors active:scale-95"
+                        className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition-colors active:scale-95"
                     >
                         <PhoneCall size={18} className="text-primary" />
                     </button>
@@ -791,48 +655,82 @@ export default function HomePage() {
             </header>
 
             {/* ── Content: perfectly centered layout for desktop ── */}
-            <div className="flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col items-center justify-center min-h-[calc(100vh-120px)] pb-12 z-10 relative">
+            <div className="flex-1 w-full max-w-4xl mx-auto px-5 lg:px-0 flex flex-col items-center justify-center min-h-[calc(100vh-120px)] pb-12 z-10 relative">
 
-                {/* Hero section */}
-                <div className="flex flex-col items-center justify-center text-center mb-10 w-full animate-in slide-in-from-bottom-8 fade-in duration-700">
-                    <div className="relative group mb-8 animate-in fade-in duration-700">
-                        <div className="absolute -inset-6 bg-gradient-to-b from-primary/20 to-transparent rounded-full blur-2xl opacity-0 lg:group-hover:opacity-100 transition-opacity duration-1000"></div>
-                        <img 
-                            src="/logo.svg" 
-                            alt="AgroTalk" 
-                            className="w-24 h-24 lg:w-36 lg:h-36 shrink-0 animate-float drop-shadow-2xl relative z-10" 
-                        />
+                {/* Hero with farmer avatar + CSS glow rings — matching reference */}
+                <div className="flex flex-col items-center justify-center text-center mb-6 w-full animate-in slide-in-from-bottom-8 fade-in duration-700">
+
+                    {/* Avatar with concentric glow rings */}
+                    <div className="relative mb-8">
+                        {/* Outer diffuse glow */}
+                        <div className="absolute inset-0 rounded-full blur-3xl scale-150" style={{ background: 'rgba(0,200,80,0.18)' }} />
+                        {/* Ring 3 - outermost */}
+                        <div className="absolute -inset-10 rounded-full border border-[#44ff88]/10 animate-pulse" style={{ animationDuration: '4s' }} />
+                        {/* Ring 2 */}
+                        <div className="absolute -inset-6 rounded-full border border-[#44ff88]/20" />
+                        {/* Ring 1 - tight */}
+                        <div className="absolute -inset-2 rounded-full border border-[#44ff88]/40" />
+                        {/* Avatar circle */}
+                        <div
+                            className="relative w-32 h-32 lg:w-40 lg:h-40 rounded-full flex items-center justify-center overflow-hidden"
+                            style={{
+                                background: 'radial-gradient(circle, #003300 0%, #001a00 100%)',
+                                border: '2px solid rgba(68,255,136,0.5)',
+                                boxShadow: '0 0 30px rgba(68,255,136,0.35), inset 0 0 20px rgba(0,100,30,0.3)',
+                            }}
+                        >
+                            <img src="/logo.svg" alt="AgroTalk" className="w-4/5 h-4/5 object-contain drop-shadow-lg" />
+                        </div>
                     </div>
-                    <div className="space-y-4 animate-in fade-in duration-700 delay-100">
-                        <h1 className="text-[clamp(2rem,7vw,3.5rem)] font-black text-foreground tracking-tight uppercase leading-[1.05] drop-shadow-sm">
+
+                    <div className="space-y-3">
+                        <h1
+                            className="text-[40px] lg:text-[68px] font-black tracking-tight leading-[1.0]"
+                            style={{ color: '#ffffff', textShadow: '0 0 50px rgba(68,255,136,0.5)' }}
+                        >
                             {t.greeting.split(' ')[0] || "Hello"}{' '}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary to-[#5da600]">{t.greeting.split(' ').slice(1).join(' ') || "Farmer!"}</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-br from-[#76b900] to-[#c5ff66]">
+                                {t.greeting.split(' ').slice(1).join(' ') || "Farmer!"}
+                            </span>
                         </h1>
-                        <p className="text-[14px] lg:text-[18px] font-bold text-[#555] dark:text-zinc-300 uppercase tracking-[0.24em] max-w-xl mx-auto">
+                        {/* Green underline accent */}
+                        <div className="w-16 h-0.5 mx-auto" style={{ background: 'linear-gradient(90deg, transparent, #44ff88, transparent)' }} />
+                        <p
+                            className="text-[12px] lg:text-[14px] font-bold uppercase tracking-[0.4em] max-w-xl mx-auto"
+                            style={{ color: 'rgba(68,255,136,0.55)', fontFamily: 'monospace' }}
+                        >
                             {t.greetingSubtext}
                         </p>
                     </div>
                 </div>
 
                 {/* Weather widget */}
-                <div className="w-full max-w-2xl mx-auto mb-10 animate-in slide-in-from-bottom-6 fade-in duration-700 delay-150">
-                    <WeatherDashboard
-                        data={weatherData}
-                        loading={isWeatherLoading}
-                        error={weatherError}
-                        language={language}
-                        lastUpdated={!isOnline ? weatherLastUpdated : null}
-                        compact
-                    />
+                <div className="w-full max-w-2xl mx-auto mb-8 animate-in slide-in-from-bottom-6 fade-in duration-700 delay-150">
+                    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden">
+                      <WeatherDashboard
+                          data={weatherData}
+                          loading={isWeatherLoading}
+                          error={weatherError}
+                          language={language}
+                          lastUpdated={!isOnline ? weatherLastUpdated : null}
+                          compact
+                      />
+                    </div>
                 </div>
 
                 {/* Chat input wrapper */}
                 <div className="flex flex-col items-center w-full max-w-3xl mx-auto gap-4 animate-in slide-in-from-bottom-4 fade-in duration-700 delay-300">
                     <form onSubmit={handleTextSubmit} className="relative w-full group">
                         {/* Outer Glow */}
-                        <div className="absolute -inset-1.5 bg-gradient-to-r from-primary/30 to-[#5da600]/30 rounded-[40px] blur-xl opacity-0 lg:group-hover:opacity-100 transition duration-700 pointer-events-none z-0"></div>
+                        <div className="absolute -inset-1.5 bg-gradient-to-r from-primary/50 to-[#c5ff66]/30 rounded-[40px] blur-xl opacity-60 lg:group-hover:opacity-100 transition duration-700 pointer-events-none z-0"></div>
                         
-                        <div className="relative bg-card/90 backdrop-blur-3xl border border-border/80 flex items-center p-2.5 lg:p-3.5 rounded-[36px] shadow-apple-lg hover:shadow-apple-xl transition-all duration-300 z-10">
+                        <div className="relative flex items-center p-2.5 lg:p-3.5 rounded-[36px] shadow-2xl transition-all duration-300 z-10"
+                          style={{
+                            background: 'rgba(255,255,255,0.06)',
+                            border: '1px solid rgba(118,185,0,0.3)',
+                            backdropFilter: 'blur(40px)'
+                          }}
+                        >
                             
                             {/* Inner Input Area */}
                             <input
@@ -840,7 +738,8 @@ export default function HomePage() {
                                 value={textInput}
                                 onChange={(e) => setTextInput(e.target.value)}
                                 placeholder={getPlaceholderText()}
-                                className="flex-1 h-14 lg:h-16 bg-transparent border-none text-[16px] lg:text-[18px] font-medium text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-0 leading-tight pl-6"
+                                className="flex-1 h-14 lg:h-16 bg-transparent border-none text-[16px] lg:text-[18px] font-medium focus:outline-none focus:ring-0 leading-tight pl-6"
+                                style={{ color: '#ffffff', caretColor: '#76b900' }}
                             />
                             
                             <div className="flex items-center gap-2 pr-2">
@@ -849,7 +748,8 @@ export default function HomePage() {
                                     <div className="animate-in zoom-in-50 duration-200">
                                         <button
                                             type="submit"
-                                            className="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-foreground text-background flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md"
+                                            className="w-12 h-12 lg:w-14 lg:h-14 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md"
+                                            style={{ background: 'linear-gradient(135deg, #76b900, #c5ff66)', color: '#000' }}
                                         >
                                             <ArrowRight size={20} strokeWidth={2.5} />
                                         </button>
@@ -872,7 +772,7 @@ export default function HomePage() {
                             </div>
                         </div>
                     </form>
-                    <p className="text-center text-[14px] font-medium text-muted-foreground tracking-wider mb-8">{t.tapToSpeak}</p>
+                    <p className="text-center text-[12px] font-medium tracking-wider mb-8" style={{ color: 'rgba(197,255,102,0.4)' }}>{t.tapToSpeak}</p>
                 </div>
             </div>
         </div>

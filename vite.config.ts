@@ -74,6 +74,8 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Deduplicate three.js across @react-three/* packages
+      "three": path.resolve(__dirname, "node_modules/three"),
     },
   },
 }));

@@ -14,9 +14,13 @@ import { ImageAnalysis } from "@/components/ImageAnalysis";
 import { LibraryScreen } from "@/components/LibraryScreen";
 import { SettingsScreen } from "@/components/SettingsScreen";
 import { MarketPriceScreen } from "@/components/MarketPriceScreen";
+import { ServicesPage } from "@/pages/ServicesPage";
 import { OfflineBanner } from "@/components/OfflineBanner";
 
 import { useLibrary } from "@/hooks/useLibrary";
+import { useChat } from "@/hooks/useChat";
+import { useApp } from "@/contexts/AppContext";
+import { OnboardingModal } from "@/components/OnboardingModal";
 import { useChat } from "@/hooks/useChat";
 import { WeatherDashboard } from "@/components/WeatherDashboard";
 import { getTranslation } from "@/lib/translations";
@@ -43,8 +47,7 @@ interface IWindow {
 export default function Index() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<NavTab>("home");
-  const [language, setLanguage] = useState("en");
-  const [voiceSpeed, setVoiceSpeed] = useState<"slow" | "normal" | "fast">("normal");
+  const { language, setLanguage, voiceSpeed, setVoiceSpeed } = useApp();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isImageOpen, setIsImageOpen] = useState(false);
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -56,6 +59,7 @@ export default function Index() {
   // Chat state
   const [isCameraActive, setIsCameraActive] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('agro_onboarded'));
   const isHindi = language === "hi";
   const [isChatMode, setIsChatMode] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -943,10 +947,10 @@ export default function Index() {
           {/* Compact Hero Section */}
           <div className="mb-6 animate-in slide-in-from-top-4 duration-500 delay-300">
             <div className="flex flex-col items-center text-center mb-4">
-              <h2 className="text-lg font-bold text-foreground tracking-tight">
+              <h2 className="font-bold text-foreground tracking-tight" style={{ fontSize: 'clamp(1.1rem, 5vw, 1.5rem)' }}>
                 {t.greeting}, <span className="text-primary">{getTranslation('common', language).farmer}!</span>
               </h2>
-              <p className="text-[12px] text-muted-foreground leading-none mt-1">
+              <p className="text-[14px] text-[#555] dark:text-[#a0a0a0] font-medium leading-tight mt-1 max-w-[280px]">
                 {t.greetingSubtext}
               </p>
             </div>
@@ -1044,8 +1048,15 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       {!isOnline && <OfflineBanner language={language} />}
+      
+      <OnboardingModal 
+        isOpen={showOnboarding} 
+        onComplete={() => setShowOnboarding(false)} 
+        language={language}
+        setLanguage={setLanguage}
+      />
 
-      <main className={cn("flex-1 flex flex-col", !isOnline ? "pt-14" : "", isChatMode && activeTab === "home" ? "h-screen" : "")}>
+      <main className={cn("flex-1 flex flex-col px-4", !isOnline ? "pt-14" : "", isChatMode && activeTab === "home" ? "h-screen" : "")}>
         {activeTab === "home" && renderHomeScreen()}
         {activeTab === "library" && (
           <LibraryScreen
@@ -1065,6 +1076,9 @@ export default function Index() {
             isOnline={isOnline}
             onShareChat={handleMarketShare}
           />
+        )}
+        {activeTab === "services" && (
+          <ServicesPage language={language} />
         )}
       </main>
 

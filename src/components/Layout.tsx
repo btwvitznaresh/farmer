@@ -14,8 +14,8 @@ interface LayoutProps {
 const NAV_ITEMS: { id: NavTab; icon: typeof Home; labelKey: string }[] = [
     { id: 'home',      icon: Home,        labelKey: 'home' },
     { id: 'market',    icon: ShoppingBag, labelKey: 'market' },
-    { id: 'services',  icon: Wrench,      labelKey: 'services' },
     { id: 'analyze',   icon: Camera,      labelKey: 'analyze' },
+    { id: 'services',  icon: Wrench,       labelKey: 'services' },
     { id: 'assistant', icon: PhoneCall,   labelKey: 'assistant' },
     { id: 'library',   icon: BookOpen,    labelKey: 'library' },
     { id: 'settings',  icon: Settings,    labelKey: 'settings' },
@@ -52,12 +52,12 @@ export function Layout({ children }: LayoutProps) {
     const tc = getTranslation('common', language);
 
     const getActiveTab = (): NavTab => {
-        if (location.pathname.startsWith('/services')) return 'services';
         switch (location.pathname) {
             case '/market':      return 'market';
             case '/library':     return 'library';
             case '/settings':    return 'settings';
             case '/analyze':     return 'analyze';
+            case '/services':    return 'services';
             case '/call-agent':  return 'assistant';
             default:             return 'home';
         }
@@ -67,22 +67,21 @@ export function Layout({ children }: LayoutProps) {
 
     const handleTabChange = (tab: NavTab) => {
         const routes: Record<NavTab, string> = {
-            home: '/', market: '/market', services: '/services', library: '/library',
-            settings: '/settings', analyze: '/analyze', assistant: '/call-agent',
+            home: '/', market: '/market', library: '/library',
+            settings: '/settings', analyze: '/analyze', assistant: '/call-agent', services: '/services'
         };
         navigate(routes[tab]);
     };
 
     const isCallAgent = location.pathname === '/call-agent';
-    const isFullScreen = isCallAgent || location.pathname === '/analyze' || location.pathname === '/scan-history';
-    // Sidebar always visible — but not on full-screen pages
-    const showSidebar = !isFullScreen;
-    // Bottom nav hides in chat mode, call agent, and camera pages
-    const showBottomNav = !isFullScreen && !isChatMode;
+    // Sidebar always visible — call agent gets it too since it's now a nav item
+    const showSidebar = true;
+    // Bottom nav hides in chat mode and call agent
+    const showBottomNav = !isCallAgent && !isChatMode;
 
     const sidebarLabels: Record<string, string> = {
-        home: t.home, market: t.market, services: (t as any).services || 'Services', analyze: (t as any).analyze || 'Scan Crop',
-        assistant: (t as any).assistant || 'Voice Agent', library: t.library, settings: t.settings
+        home: t.home, market: t.market, analyze: (t as any).analyze || 'Scan Crop',
+        assistant: (t as any).assistant || 'Voice Agent', library: t.library, settings: t.settings, services: (t as any).services || 'Services'
     };
 
     const sidebarW = collapsed ? 'w-[68px]' : 'w-64';

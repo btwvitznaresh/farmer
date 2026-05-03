@@ -1,6 +1,12 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
+import { Booking } from '../types/services';
 
 interface AgroTalkDB extends DBSchema {
+    bookings: {
+        key: string;
+        value: Booking;
+        indexes: { 'by-status': string, 'by-date': string };
+    };
     market_data: {
         key: string;
         value: {
@@ -90,35 +96,10 @@ interface AgroTalkDB extends DBSchema {
         };
         indexes: { 'by-timestamp': number };
     };
-    service_bookings: {
-        key: string;
-        value: {
-            id: string;
-            serviceId: string;
-            serviceName: string;
-            category: string;
-            farmerName: string;
-            farmLocation: string;
-            village: string;
-            specialInstructions: string;
-            scheduleDate: string;
-            timeSlot: 'morning' | 'afternoon' | 'evening';
-            status: 'pending' | 'confirmed' | 'in-progress' | 'completed';
-            assignedMember: string;
-            priceMin: number;
-            priceMax: number;
-            reportSummary?: string;
-            reportPhotos?: string[];
-            reportRecommendations?: string[];
-            createdAt: number;
-            updatedAt: number;
-        };
-        indexes: { 'by-status': string; 'by-updatedAt': number };
-    };
 }
 
 const DB_NAME = 'agrotalk-db';
-const DB_VERSION = 4; // bumped: adds service_bookings store
+const DB_VERSION = 4; // bumped: adds bookings store
 
 export const dbService = {
     dbPromise: null as Promise<IDBPDatabase<AgroTalkDB>> | null,
@@ -168,11 +149,11 @@ export const dbService = {
                         ordersStore.createIndex('by-timestamp', 'timestamp');
                     }
 
-                    // Service Bookings Store
-                    if (!db.objectStoreNames.contains('service_bookings')) {
-                        const bookingsStore = db.createObjectStore('service_bookings', { keyPath: 'id' });
+                    // Bookings Store
+                    if (!db.objectStoreNames.contains('bookings')) {
+                        const bookingsStore = db.createObjectStore('bookings', { keyPath: 'id' });
                         bookingsStore.createIndex('by-status', 'status');
-                        bookingsStore.createIndex('by-updatedAt', 'updatedAt');
+                        bookingsStore.createIndex('by-date', 'scheduledDate');
                     }
                 },
             });
@@ -216,3 +197,29 @@ export const dbService = {
         return db.clear(storeName);
     }
 };
+
+// --- Booking Wrappers ---
+
+export async function saveBooking(booking: Booking): Promise<void> {
+    await dbService.put('bookings', booking);
+}
+
+export async function getBookings(): Promise<Booking[]> {
+    return await dbService.getAll('bookings');
+}
+
+export async function getBookingById(id: string): Promise<Booking | undefined> {
+    return await dbService.get('bookings', id);
+}
+
+export async function updateBookingStatus(id: string, status: Booking['status']): Promise<void> {
+    const booking = await getBookingById(id);
+    if (booking) {
+        booking.status = status;
+        await saveBooking(booking);
+    }
+}
+
+export async function deleteBooking(id: string): Promise<void> {
+    await dbService.delete('bookings', id);
+}

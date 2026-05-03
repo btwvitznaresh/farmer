@@ -1,4 +1,3 @@
-import { useState, useCallback } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,24 +6,22 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout";
-import SplashScreen from "@/components/SplashScreen";
 import HomePage from "./pages/HomePage";
 import MarketPage from "./pages/MarketPage";
 import LibraryPage from "./pages/LibraryPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
-import AgentScreen from "./pages/AgentScreen";
-import CropScanPage from "./pages/CropScanPage";
-import ScanHistoryPage from "./pages/ScanHistoryPage";
+import CallAgentPage from "./pages/CallAgentPage";
+import AnalyzePage from "./pages/AnalyzePage";
 import LibraryDetailPage from "./pages/LibraryDetailPage";
 import LoginPage from "./pages/LoginPage";
-import ServicesPage from "./pages/ServicesPage";
-import ServiceDetailsPage from "./pages/ServiceDetailsPage";
-import ServiceSchedulePage from "./pages/ServiceSchedulePage";
-import ServiceConfirmedPage from "./pages/ServiceConfirmedPage";
+import { ServicesPage } from "./pages/ServicesPage";
+import ServiceDetailPage from "./pages/ServiceDetailPage";
 import MyBookingsPage from "./pages/MyBookingsPage";
 import ServiceReportPage from "./pages/ServiceReportPage";
+import ScanHistoryPage from "./pages/ScanHistoryPage";
+import DiseaseReportPage from "./pages/DiseaseReportPage";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { get, set, del } from "idb-keyval";
@@ -59,57 +56,48 @@ const persister = createAsyncStoragePersister({
   },
 });
 
-import { LogOut, User as UserIcon } from "lucide-react";
-
-// Inner component so it can consume AuthContext
+// Inner component so it can consume AuthContext and AppContext
 function ProtectedApp() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <AppProvider>
-        <Layout>
+      <Layout>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/market" element={<MarketPage />} />
             <Route path="/library" element={<LibraryPage />} />
-            <Route path="/services" element={<ServicesPage />} />
-            <Route path="/services/service/:serviceId" element={<ServiceDetailsPage />} />
-            <Route path="/services/book/:serviceId" element={<ServiceSchedulePage />} />
-            <Route path="/services/confirmed/:bookingId" element={<ServiceConfirmedPage />} />
-            <Route path="/services/bookings" element={<MyBookingsPage />} />
-            <Route path="/services/report/:bookingId" element={<ServiceReportPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="/call-agent" element={<AgentScreen />} />
-            <Route path="/analyze" element={<CropScanPage />} />
-            <Route path="/scan-history" element={<ScanHistoryPage />} />
+            <Route path="/call-agent" element={<CallAgentPage />} />
+            <Route path="/analyze" element={<AnalyzePage />} />
             <Route path="/library/:id" element={<LibraryDetailPage />} />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/services/:id" element={<ServiceDetailPage />} />
+            <Route path="/bookings" element={<MyBookingsPage />} />
+            <Route path="/bookings/:id/report" element={<ServiceReportPage />} />
+            <Route path="/history" element={<ScanHistoryPage />} />
+            <Route path="/disease-report/:id" element={<DiseaseReportPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
-      </AppProvider>
     </BrowserRouter>
   );
 }
 
-const App = () => {
-  const [splashDone, setSplashDone] = useState(false);
-  const handleSplashComplete = useCallback(() => setSplashDone(true), []);
-
-  return (
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={{ persister }}
-    >
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        {!splashDone && <SplashScreen onComplete={handleSplashComplete} />}
-        <AuthProvider>
+const App = () => (
+  <PersistQueryClientProvider
+    client={queryClient}
+    persistOptions={{ persister }}
+  >
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <AuthProvider>
+        <AppProvider>
           <ProtectedApp />
-        </AuthProvider>
-      </TooltipProvider>
-    </PersistQueryClientProvider>
-  );
-};
+        </AppProvider>
+      </AuthProvider>
+    </TooltipProvider>
+  </PersistQueryClientProvider>
+);
 
 export default App;

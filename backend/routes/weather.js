@@ -51,29 +51,10 @@ router.get('/', async (req, res) => {
             data: data
         });
     } catch (error) {
-        console.warn('⚠️ Weather API unavailable. Using MOCK weather data for debugging:', error.message);
-        
-        const mockData = {
-            current: {
-                temperature_2m: 28.5,
-                relative_humidity_2m: 65,
-                weather_code: 1, // Mostly clear
-                wind_speed_10m: 10.2
-            },
-            daily: {
-                time: [new Date().toISOString().split('T')[0]],
-                weather_code: [1],
-                temperature_2m_max: [32.0],
-                temperature_2m_min: [22.0]
-            }
-        };
-
-        // Cache the mock data so we don't keep waiting for timeouts
-        cacheService.set(cacheKey, mockData, 900);
-
-        res.json({
-            success: true,
-            data: mockData
+        console.error('Weather API error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Internal server error'
         });
     }
 });

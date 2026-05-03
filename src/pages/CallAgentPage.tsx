@@ -75,7 +75,12 @@ export default function CallAgentPage() {
 
             const audioBlob = await getNvidiaTts(text, language, selectedVoice);
             if (!isActiveRef.current) return;
-            playResponse(text, undefined, audioBlob ?? undefined);
+            if (audioBlob) {
+                playResponse(text, undefined, audioBlob);
+            } else {
+                setCallState('idle');
+                startListening();
+            }
         }, 1500);
 
         return () => {
@@ -97,7 +102,6 @@ export default function CallAgentPage() {
             ttsAudio.pause();
             ttsAudio.src = "";
         }
-        window.speechSynthesis.cancel();
     };
 
     const endCall = () => {
@@ -213,9 +217,13 @@ export default function CallAgentPage() {
             const farewell = farewells[language] || farewells.en;
             try {
                 const audioBlob = await getNvidiaTts(farewell, language, selectedVoice);
-                playResponse(farewell, undefined, audioBlob ?? undefined, true);
+                if (audioBlob) {
+                    playResponse(farewell, undefined, audioBlob, true);
+                } else {
+                    onPlaybackEnd(true);
+                }
             } catch {
-                playResponse(farewell, undefined, undefined, true);
+                onPlaybackEnd(true);
             }
             return;
         }
@@ -318,28 +326,16 @@ export default function CallAgentPage() {
                 onPlaybackEnd(isExit);
             }
         } else {
-            console.log("Falling back to browser TTS");
-            try {
-                const utterance = new SpeechSynthesisUtterance(text);
-                const langMap: Record<string, string> = {
-                    'hi': 'hi-IN', 'ta': 'ta-IN', 'te': 'te-IN', 'mr': 'mr-IN', 'en': 'en-US'
-                };
-                utterance.lang = langMap[language] || 'en-US';
-                
-                // Set voice if a matching one is available
-                const voices = window.speechSynthesis.getVoices();
-                const matchedVoice = voices.find(v => v.lang.startsWith(utterance.lang.split('-')[0]));
-                if (matchedVoice) {
-                    utterance.voice = matchedVoice;
-                }
-                
-                utterance.onend = () => onPlaybackEnd(isExit);
-                utterance.onerror = () => onPlaybackEnd(isExit);
-                window.speechSynthesis.speak(utterance);
-            } catch (e) {
-                console.error("Browser TTS failed:", e);
-                onPlaybackEnd(isExit);
-            }
+            console.log("🗣️ Using Browser TTS fallback");
+            const utterance = new SpeechSynthesisUtterance(text);
+            const langMap: Record<string, string> = { 'hi': 'hi-IN', 'ta': 'ta-IN', 'te': 'te-IN', 'mr': 'mr-IN', 'en': 'en-US' };
+            utterance.lang = langMap[language] || 'en-US';
+            utterance.rate = 1.0;
+            
+            utterance.onend = () => onPlaybackEnd(isExit);
+            utterance.onerror = () => onPlaybackEnd(isExit);
+            
+            window.speechSynthesis.speak(utterance);
         }
     };
 

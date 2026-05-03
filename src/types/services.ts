@@ -1,70 +1,33 @@
-/**
- * AgroTalk Services Marketplace — Canonical Types
- */
-
-export type ServiceCategory =
-  | 'all'
-  | 'soil-water'
-  | 'crop-health'
-  | 'drone-tech'
-  | 'infrastructure'
-  | 'advisory'
-  | 'government';
-
-export type TimeSlot = 'morning' | 'afternoon' | 'evening';
-export type BookingStatus = 'pending' | 'confirmed' | 'in-progress' | 'completed';
-export type Urgency = 'normal' | 'urgent';
-
-export interface ServiceTeamMember {
-  name: string;
-  role: string;
-}
-
-export interface ServiceReview {
-  author: string;
-  comment: string;
-}
+export type ServiceCategory = 'soil' | 'crop' | 'drone' | 'infrastructure' | 'advisory' | 'government';
 
 export interface Service {
   id: string;
   name: string;
-  category: ServiceCategory;
-  shortDescription: string;
+  nameLocale: Record<string, string>; // ta, hi, te, mr, en
   description: string;
-  includes: string[];
-  priceMin: number;
+  descLocale: Record<string, string>;
+  icon: string;           // emoji
+  category: ServiceCategory;
+  priceMin: number;       // in ₹
   priceMax: number;
-  duration: string;
-  iconEmoji: string;       // emoji icon
-  iconBgClass: string;     // tailwind bg class for colored tile
-  teamMember: ServiceTeamMember;
-  rating: number;
-  reviews: ServiceReview[];
+  duration: string;       // "2-3 hrs"
+  includes: string[];     // checklist items
+  urgencyLevels: ('normal' | 'urgent')[];
 }
 
 export interface Booking {
-  id: string;
+  id: string;             // generated uuid
   serviceId: string;
   serviceName: string;
-  serviceEmoji: string;
-  category: string;
   farmerName: string;
   farmLocation: string;
-  village: string;
+  scheduledDate: string;
+  timeSlot: 'morning' | 'afternoon' | 'evening';
+  status: 'pending' | 'confirmed' | 'in-progress' | 'completed';
+  urgency: 'normal' | 'urgent';
   specialInstructions: string;
-  scheduleDate: string;
-  timeSlot: TimeSlot;
-  urgency: Urgency;
-  status: BookingStatus;
-  assignedMember: string;
-  priceMin: number;
-  priceMax: number;
-  urgencySurcharge: number;
-  attachedScanDisease?: string;
-  attachedScanSeverity?: string;
-  reportSummary?: string;
-  reportPhotos?: string[];
-  reportRecommendations?: string[];
-  createdAt: number;
-  updatedAt: number;
+  attachedScanId?: string;  // from crop disease scan
+  createdAt: string;
+  teamMember?: string;
+  reportUrl?: string;
 }

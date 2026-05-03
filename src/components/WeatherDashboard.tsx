@@ -141,7 +141,7 @@ export const WeatherDashboard: React.FC<WeatherDashboardProps> = ({
       <div
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
-          "bg-card/80 backdrop-blur-xl rounded-2xl cursor-pointer overflow-hidden border border-border/50 shadow-sm transition-all duration-300",
+          "bg-card/40 backdrop-blur-xl rounded-2xl cursor-pointer overflow-hidden border border-white/10 transition-all duration-300",
           isExpanded ? "ring-1 ring-primary/30" : "shadow-sm"
         )}
       >
@@ -156,14 +156,14 @@ export const WeatherDashboard: React.FC<WeatherDashboardProps> = ({
                   <span className="text-[22px] font-black tracking-tighter text-foreground leading-none">
                     {Math.round(data.current.temperature_2m)}°
                   </span>
-                  <span className="text-[14px] font-semibold text-muted-foreground truncate">{currentLabel}</span>
+                  <span className="text-[11px] font-semibold text-muted-foreground/70 truncate">{currentLabel}</span>
                 </div>
                 <div className="flex items-center gap-3 mt-0.5">
-                  <span className="flex items-center gap-1 text-[14px] text-muted-foreground">
+                  <span className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
                     <Droplets size={10} className="text-blue-400" />
                     {data.current.relative_humidity_2m}%
                   </span>
-                  <span className="flex items-center gap-1 text-[14px] text-muted-foreground">
+                  <span className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
                     <Wind size={10} className="text-teal-400" />
                     {data.current.wind_speed_10m} km/h
                   </span>
@@ -178,8 +178,8 @@ export const WeatherDashboard: React.FC<WeatherDashboardProps> = ({
         <AnimatePresence>
           {isExpanded && data.daily && (
             <div className="px-4 pb-4 pt-2 border-t border-border/10">
-              <div className="grid grid-cols-3 gap-2">
-                {data.daily.time.slice(0, 3).map((time, idx) => {
+              <div className="grid grid-cols-5 gap-2">
+                {data.daily.time.slice(0, 5).map((time, idx) => {
                   const dateInfo = formatDate(time, language);
                   const isToday = idx === 0;
                   return (
@@ -235,7 +235,7 @@ export const WeatherDashboard: React.FC<WeatherDashboardProps> = ({
                   / {t.realFeel} {Math.round(data.current.temperature_2m + 2)}°
                 </span>
               </div>
-              <p className="text-[14px] font-semibold text-muted-foreground italic leading-none">{currentLabel}</p>
+              <p className="text-[12px] font-semibold text-muted-foreground/90 italic leading-none">{currentLabel}</p>
             </div>
 
             <div
@@ -255,7 +255,7 @@ export const WeatherDashboard: React.FC<WeatherDashboardProps> = ({
                   <Droplets size={16} className="text-blue-500" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[14px] font-bold text-muted-foreground leading-none mb-0.5">{t.humidity}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-0.5">Humidity</span>
                   <span className="text-[13px] font-black text-foreground">{data.current.relative_humidity_2m}%</span>
                 </div>
               </div>
@@ -264,7 +264,7 @@ export const WeatherDashboard: React.FC<WeatherDashboardProps> = ({
                   <Wind size={16} className="text-teal-500" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[14px] font-bold text-muted-foreground leading-none mb-0.5">{t.wind}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-0.5">Wind</span>
                   <span className="text-[13px] font-black text-foreground">{data.current.wind_speed_10m} km/h</span>
                 </div>
               </div>
@@ -287,8 +287,8 @@ export const WeatherDashboard: React.FC<WeatherDashboardProps> = ({
                 <div className="flex justify-between items-center mb-5">
                   <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/70">{t.next5Days}</h4>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                  {data.daily.time.slice(0, 3).map((time, idx) => {
+                <div className="grid grid-cols-5 gap-3">
+                  {data.daily.time.slice(0, 5).map((time, idx) => {
                     const dateInfo = formatDate(time, language);
                     const isToday = idx === 0;
                     return (

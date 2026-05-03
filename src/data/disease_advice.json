@@ -1,0 +1,55 @@
+{
+  "diseases": [
+    {
+      "id": "tomato_bacterial_spot",
+      "crop": "Tomato",
+      "disease": "Bacterial Spot",
+      "severity": "Moderate",
+      "translations": {
+        "hi": { "crop": "टमाटर", "disease": "बैक्टीरियल स्पॉट" },
+        "ta": { "crop": "தக்காளி", "disease": "பாக்டீரியா புள்ளி" },
+        "te": { "crop": "టమాటా", "disease": "బ్యాక్టీరియల్ స్పాట్" },
+        "mr": { "crop": "टोमॅटो", "disease": "बॅक्टेरियल स्पॉट" }
+      },
+      "symptoms": ["Small, water-soaked spots on leaves", "Spots turn dark brown with yellow halos", "Leaves may yellow and drop"],
+      "causes": ["Bacterium Xanthomonas campestris pv. vesicatoria", "Spread by splashing rain or irrigation"],
+      "treatment": ["Apply copper-based bactericides", "Remove and destroy severely infected plants"],
+      "costEstimate": "₹400 - ₹600",
+      "prevention": ["Use disease-free seed", "Practice crop rotation", "Avoid overhead watering"]
+    },
+    {
+      "id": "potato_late_blight",
+      "crop": "Potato",
+      "disease": "Late Blight",
+      "severity": "Severe",
+      "translations": {
+        "hi": { "crop": "आलू", "disease": "लेट ब्लाइट" },
+        "ta": { "crop": "உருளைக்கிழங்கு", "disease": "தாமதமான கருகல்" },
+        "te": { "crop": "బంగాళాదుంప", "disease": "లేట్ బ్లైట్" },
+        "mr": { "crop": "बटाटा", "disease": "लेट ब्लाइट" }
+      },
+      "symptoms": ["Water-soaked spots on lower leaves", "White fungal growth on leaf undersides", "Rapid defoliation"],
+      "causes": ["Oomycete Phytophthora infestans", "Favored by cool, wet weather"],
+      "treatment": ["Apply preventative fungicides (e.g., chlorothalonil)", "Harvest early if tuber infection is risked"],
+      "costEstimate": "₹800 - ₹1200",
+      "prevention": ["Plant resistant varieties", "Destroy cull piles", "Ensure good field drainage"]
+    },
+    {
+      "id": "corn_common_rust",
+      "crop": "Corn",
+      "disease": "Common Rust",
+      "severity": "Mild",
+      "translations": {
+        "hi": { "crop": "मक्का", "disease": "सामान्य रस्ट" },
+        "ta": { "crop": "சோளம்", "disease": "பொதுவான துரு" },
+        "te": { "crop": "మొక్కజొన్న", "disease": "కామన్ రస్ట్" },
+        "mr": { "crop": "मका", "disease": "कॉमन रस्ट" }
+      },
+      "symptoms": ["Small, powdery, cinnamon-brown pustules", "Found on both upper and lower leaf surfaces", "Leaves may turn yellow"],
+      "causes": ["Fungus Puccinia sorghi", "Spores blown by wind from warmer climates"],
+      "treatment": ["Usually not required unless infection is early and severe", "Foliar fungicides if economic threshold reached"],
+      "costEstimate": "₹300 - ₹500",
+      "prevention": ["Plant resistant hybrids", "Plant early to avoid peak spore loads"]
+    }
+  ]
+}

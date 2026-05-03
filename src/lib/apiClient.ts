@@ -211,8 +211,7 @@ export async function transcribeAndGetAdvice(
             success: true,
             transcript: result.transcript,
             advisory: result.advisory as AgriculturalAdvisory,
-            audio: result.audio || undefined,
-            newLanguage: result.newLanguage || undefined
+            audio: result.audio || undefined
         };
     } catch (error) {
         console.error('❌ Transcribe request failed:', error);
@@ -433,8 +432,7 @@ export async function getTextAdvice(
             success: true,
             transcript: result.transcript,
             advisory: result.advisory as AgriculturalAdvisory,
-            audio: result.audio || undefined,
-            newLanguage: result.newLanguage || undefined
+            audio: result.audio || undefined
         };
 
     } catch (error) {
